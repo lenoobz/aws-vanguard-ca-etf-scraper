@@ -14,11 +14,10 @@ require (
 	github.com/golang/protobuf v1.4.3 // indirect
 	github.com/kennygrant/sanitize v1.2.4 // indirect
 	github.com/saintfish/chardet v0.0.0-20120816061221-3af4cd4741ca // indirect
-	github.com/stretchr/testify v1.4.0 // indirect
 	github.com/temoto/robotstxt v1.1.1 // indirect
+	go.mongodb.org/mongo-driver v1.4.4 // indirect
 	golang.org/x/net v0.0.0-20201209123823-ac852fbbde11 // indirect
 	golang.org/x/text v0.3.4 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.25.0 // indirect
-	gopkg.in/yaml.v2 v2.2.5 // indirect
 )
