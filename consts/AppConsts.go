@@ -8,6 +8,9 @@ const SchemaVersion = 1
 // CollectionFundOverview const
 const CollectionFundOverview = "fund_overview"
 
+// CollectionFundHolding const
+const CollectionFundHolding = "fund_holding"
+
 // TimeoutMS const
 const TimeoutMS = 15000
 
@@ -44,4 +47,25 @@ const FundListURL = "https://api.vanguard.com/rs/gre/gra/1.7.0/datasets/caw-indv
 // GetFundOverviewURL get fund overview url
 func GetFundOverviewURL(portID string) string {
 	return fmt.Sprintf("https://api.vanguard.com/rs/gre/gra/1.7.0/datasets/caw-indv-overview-data-etf.json?vars=portId:%s,lang:en&path=[portId=%s][0]", portID, portID)
+}
+
+// GetFundHoldingURL get fund holding url
+func GetFundHoldingURL(portID, issueType, assetCode string) string {
+	var URL string
+
+	switch assetCode {
+	case "BOND":
+		URL = fmt.Sprintf("https://api.vanguard.com/rs/gre/gra/1.7.0/datasets/caw-indv-holding-details-bond.json?vars=portId:%s,issueType:%s", portID, issueType)
+		break
+	case "EQUITY":
+		URL = fmt.Sprintf("https://api.vanguard.com/rs/gre/gra/1.7.0/datasets/caw-indv-holding-details-equity.json?vars=portId:%s,issueType:%s", portID, issueType)
+		break
+	case "BALANCED":
+		URL = fmt.Sprintf("https://api.vanguard.com/rs/gre/gra/1.7.0/datasets/caw-indv-holding-details-balanced.json?vars=portId:%s,issueType:%s", portID, issueType)
+		break
+	default:
+		break
+	}
+
+	return URL
 }

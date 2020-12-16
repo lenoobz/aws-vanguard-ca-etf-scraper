@@ -33,4 +33,5 @@ func main() {
 
 	jobs.FundListCol.Wait()
 	jobs.FundOverviewCol.Wait()
+	jobs.FundHoldingCol.Wait()
 }

@@ -16,6 +16,7 @@ import (
 type FundScraper struct {
 	FundListCol     *colly.Collector
 	FundOverviewCol *colly.Collector
+	FundHoldingCol  *colly.Collector
 	fundService     services.IFundService
 }
 
@@ -23,13 +24,16 @@ type FundScraper struct {
 func NewFundScraper(svc services.IFundService) *FundScraper {
 	fl := newFundListScraper()
 	fo := newFundOverviewScraper()
+	fh := newFundHoldingScraper()
 
-	fl.OnResponse(processFundListResponse(fo))
+	fl.OnResponse(processFundListResponse(fo, fh))
 	fo.OnResponse(processFundOverviewResponse(svc))
+	fh.OnResponse(processFundHoldingResponse(svc))
 
 	return &FundScraper{
 		FundListCol:     fl,
 		FundOverviewCol: fo,
+		FundHoldingCol:  fh,
 		fundService:     svc,
 	}
 }
@@ -90,7 +94,40 @@ func newFundOverviewScraper() *colly.Collector {
 	return c
 }
 
-func processFundListResponse(fo *colly.Collector) colly.ResponseCallback {
+func newFundHoldingScraper() *colly.Collector {
+	c := colly.NewCollector(
+		// colly.Debugger(&debug.LogDebugger{}),
+		colly.AllowedDomains(consts.AllowDomain),
+		colly.Async(true),
+	)
+
+	// Limit the number of threads started by colly to two
+	// when visiting links which domains' matches "*httpbin.*" glob
+	c.Limit(&colly.LimitRule{
+		DomainGlob:  consts.DomainGlob,
+		Parallelism: 2,
+		RandomDelay: 5 * time.Second,
+	})
+
+	extensions.RandomUserAgent(c)
+	extensions.Referer(c)
+
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println("Request URL:", r.Request.URL, "failed with response:", r, "\nError:", err)
+	})
+
+	c.OnScraped(func(r *colly.Response) {
+		fmt.Println("Finished", r.Request.URL)
+	})
+
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println("Visiting", r.URL.String())
+	})
+
+	return c
+}
+
+func processFundListResponse(fo, fh *colly.Collector) colly.ResponseCallback {
 	return func(r *colly.Response) {
 		rs := &domains.VanguardFunds{}
 		if err := json.Unmarshal(r.Body, rs); err != nil {
@@ -98,22 +135,28 @@ func processFundListResponse(fo *colly.Collector) colly.ResponseCallback {
 			return
 		}
 
-		if err := handleFundList(rs, fo); err != nil {
+		if err := handleFundList(rs, fo, fh); err != nil {
 			fmt.Println("error occurred when processing fund list response", err)
 			return
 		}
 	}
 }
 
-func handleFundList(funds *domains.VanguardFunds, fo *colly.Collector) error {
+func handleFundList(funds *domains.VanguardFunds, fo, fh *colly.Collector) error {
 	for key, element := range funds.IndividualFunds {
 		if element.Ticker != "" {
 			// fmt.Println("Key:", key, "=>", "Ticker:", element.Ticker, "=>", "Asset Code:", element.AssetCode)
 
 			overviewURL := consts.GetFundOverviewURL(key)
-			if err := fo.Visit(overviewURL); err != nil {
-				fmt.Println("error occurred when visit url", overviewURL, err)
-			}
+			overviewCTX := colly.NewContext()
+			fo.Request("GET", overviewURL, nil, overviewCTX, nil)
+
+			holdingURL := consts.GetFundHoldingURL(key, "F", element.AssetCode)
+			holdingCTX := colly.NewContext()
+			holdingCTX.Put("portId", key)
+			holdingCTX.Put("ticker", element.Ticker)
+			holdingCTX.Put("assetCode", element.AssetCode)
+			fh.Request("GET", holdingURL, nil, holdingCTX, nil)
 		}
 	}
 
@@ -137,6 +180,60 @@ func processFundOverviewResponse(svc services.IFundService) colly.ResponseCallba
 
 func handleFundOverview(overview *domains.FundOverview, svc services.IFundService) error {
 	if err := svc.CreateFundOverview(overview); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func processFundHoldingResponse(svc services.IFundService) colly.ResponseCallback {
+	return func(r *colly.Response) {
+		portID := r.Request.Ctx.Get("portId")
+		ticker := r.Request.Ctx.Get("ticker")
+		assetCode := r.Request.Ctx.Get("assetCode")
+
+		rs := &domains.FundHolding{
+			PortID:    portID,
+			Ticker:    ticker,
+			AssetCode: assetCode,
+		}
+
+		if assetCode == "BOND" {
+			if err := json.Unmarshal(r.Body, &rs.BondHolding); err != nil {
+				fmt.Println("error occurred when parsing bond fund holding response", err)
+				return
+			}
+
+			if err := handleFundHolding(rs, svc); err != nil {
+				fmt.Println("error occurred when processing bond fund holding response", err)
+				return
+			}
+		} else if assetCode == "EQUITY" {
+			if err := json.Unmarshal(r.Body, &rs.EquityHolding); err != nil {
+				fmt.Println("error occurred when parsing equity fund holding response", err)
+				return
+			}
+
+			if err := handleFundHolding(rs, svc); err != nil {
+				fmt.Println("error occurred when processing equity fund holding response", err)
+				return
+			}
+		} else if assetCode == "BALANCED" {
+			if err := json.Unmarshal(r.Body, &rs.BalancedHolding); err != nil {
+				fmt.Println("error occurred when parsing balanced fund holding response", err)
+				return
+			}
+
+			if err := handleFundHolding(rs, svc); err != nil {
+				fmt.Println("error occurred when processing balanced fund holding response", err)
+				return
+			}
+		}
+	}
+}
+
+func handleFundHolding(fundHolding *domains.FundHolding, svc services.IFundService) error {
+	if err := svc.CreateFundHolding(fundHolding); err != nil {
 		return err
 	}
 

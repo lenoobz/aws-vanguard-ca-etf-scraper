@@ -21,3 +21,8 @@ func NewFundService(fundRepo repositories.IFundRepository) *FundService {
 func (svc *FundService) CreateFundOverview(fo *domains.FundOverview) error {
 	return svc.fundRepo.InsertFundOverview(fo)
 }
+
+// CreateFundHolding creates fund overview
+func (svc *FundService) CreateFundHolding(fh *domains.FundHolding) error {
+	return svc.fundRepo.InsertFundHolding(fh)
+}

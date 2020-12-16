@@ -102,6 +102,35 @@ func (repo *FundRepo) InsertFundOverview(fo *domains.FundOverview) error {
 	return nil
 }
 
+// InsertFundHolding inserts new fund holding
+func (repo *FundRepo) InsertFundHolding(fh *domains.FundHolding) error {
+	fundHolding, err := mappers.MapFundHoldingDomain(fh)
+	if err != nil {
+		return err
+	}
+
+	fundHolding.IsActive = true
+	fundHolding.Schema = consts.SchemaVersion
+	fundHolding.CreatedAt = time.Now().UTC().Unix()
+
+	// create new context for the query
+	ctx, cancel := createContext()
+	defer cancel()
+
+	// what collection we are going to use
+	col := repo.DB.Collection(consts.CollectionFundHolding)
+
+	// insert options
+	insertOptions := options.InsertOne()
+
+	_, err = col.InsertOne(ctx, fundHolding, insertOptions)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Private helper functions
 ///////////////////////////////////////////////////////////////////////////////
