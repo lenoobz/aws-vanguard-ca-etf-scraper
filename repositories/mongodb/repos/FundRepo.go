@@ -15,14 +15,14 @@ import (
 
 // FundRepo struct
 type FundRepo struct {
-	db *mongo.Database
+	DB *mongo.Database
 }
 
 // NewFundRepo creates new fund mongo repo
 func NewFundRepo(db *mongo.Database) (*FundRepo, error) {
 	if db != nil {
 		return &FundRepo{
-			db: db,
+			DB: db,
 		}, nil
 	}
 
@@ -65,7 +65,7 @@ func NewFundRepo(db *mongo.Database) (*FundRepo, error) {
 	}
 
 	return &FundRepo{
-		db: client.Database(consts.Dbname),
+		DB: client.Database(consts.Dbname),
 	}, nil
 }
 
@@ -89,7 +89,7 @@ func (repo *FundRepo) InsertFundOverview(fo *domains.FundOverview) error {
 	defer cancel()
 
 	// what collection we are going to use
-	col := repo.db.Collection(consts.CollectionFundOverview)
+	col := repo.DB.Collection(consts.CollectionFundOverview)
 
 	// insert options
 	insertOptions := options.InsertOne()
