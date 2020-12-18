@@ -12,7 +12,7 @@ const CollectionFundOverview = "fund_overview"
 const CollectionFundHolding = "fund_holding"
 
 // TimeoutMS const
-const TimeoutMS = 15000
+const TimeoutMS = 360000
 
 // MinPoolSize const
 const MinPoolSize = 5
