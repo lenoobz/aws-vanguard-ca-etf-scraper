@@ -111,37 +111,13 @@ func MapFundHoldingDomain(fund *domains.FundHolding) (*models.FundHoldingModel, 
 func mapBondHoldingSectorWeightBond(bond *domains.BondHoldingSectorWeightBond) (*models.SectorWeightBondModel, error) {
 	var bondModel = &models.SectorWeightBondModel{}
 
-	// if bond.Cusip != "" {
-	// 	bondModel.Cusip = bond.Cusip
-	// }
-
-	// if bond.Isin != "" {
-	// 	bondModel.Isin = bond.Isin
-	// }
-
-	// if bond.MaturityDate != "" {
-	// 	bondModel.MaturityDate = bond.MaturityDate
-	// }
-
-	// if bond.MaturityDateNumber != "" {
-	// 	bondModel.MaturityDateNumber = bond.MaturityDateNumber
-	// }
-
-	// if bond.Securities != "" {
-	// 	bondModel.Securities = bond.Securities
-	// }
-
-	// if bond.Sedol != "" {
-	// 	bondModel.Sedol = bond.Sedol
-	// }
-
 	bondModel.FaceAmount = bond.FaceAmount
 
 	if bond.MarketValPercent != "" {
 		marketValPercent, err := strconv.ParseFloat(bond.MarketValPercent, 64)
 
 		if err != nil {
-			fmt.Println("error occurred when parsing marketValPercent field", err)
+			fmt.Println("[warning] - error occurred when parsing marketValPercent field", err)
 			marketValPercent = 0
 		}
 
@@ -160,38 +136,6 @@ func mapBondHoldingSectorWeightBond(bond *domains.BondHoldingSectorWeightBond) (
 func mapEquityHoldingSectorWeightStock(equity *domains.EquityHoldingSectorWeightStock) (*models.SectorWeightStockModel, error) {
 	var equityModel = &models.SectorWeightStockModel{}
 
-	// if equity.Currency != "" {
-	// 	equityModel.Currency = equity.Currency
-	// }
-
-	// if equity.Country != "" {
-	// 	equityModel.Country = equity.Country
-	// }
-
-	// if equity.Cusip != "" {
-	// 	equityModel.Cusip = equity.Cusip
-	// }
-
-	// if equity.EquityExchangeCode != "" {
-	// 	equityModel.EquityExchangeCode = equity.EquityExchangeCode
-	// }
-
-	// if equity.Holding != "" {
-	// 	equityModel.Holding = equity.Holding
-	// }
-
-	// if equity.Isin != "" {
-	// 	equityModel.Holding = equity.Isin
-	// }
-
-	// if equity.Sector != "" {
-	// 	equityModel.Holding = equity.Sector
-	// }
-
-	// if equity.Sedol != "" {
-	// 	equityModel.Holding = equity.Sedol
-	// }
-
 	if equity.Symbol != "" {
 		equityModel.Symbol = equity.Symbol
 	}
@@ -200,7 +144,7 @@ func mapEquityHoldingSectorWeightStock(equity *domains.EquityHoldingSectorWeight
 		marketValPercent, err := strconv.ParseFloat(equity.MarketValPercent, 64)
 
 		if err != nil {
-			fmt.Println("error occurred when parsing marketValPercent field", err)
+			fmt.Println("[warning] - error occurred when parsing marketValPercent field", err)
 			marketValPercent = 0
 		}
 
@@ -211,7 +155,7 @@ func mapEquityHoldingSectorWeightStock(equity *domains.EquityHoldingSectorWeight
 		marketValue, err := strconv.ParseFloat(equity.MarketValue, 64)
 
 		if err != nil {
-			fmt.Println("error occurred when parsing marketValue field", err)
+			fmt.Println("[warning] - error occurred when parsing marketValue field", err)
 			marketValue = 0
 		}
 
@@ -228,18 +172,6 @@ func mapEquityHoldingSectorWeightStock(equity *domains.EquityHoldingSectorWeight
 func mapBalancedHoldingSectorWeightBond(bond *domains.BalancedHoldingSectorWeightBond) (*models.SectorWeightBondModel, error) {
 	var bondModel = &models.SectorWeightBondModel{}
 
-	// if bond.MaturityDate != "" {
-	// 	bondModel.MaturityDate = bond.MaturityDate
-	// }
-
-	// if bond.MaturityDateNumber != "" {
-	// 	bondModel.MaturityDateNumber = bond.MaturityDateNumber
-	// }
-
-	// if bond.Securities != "" {
-	// 	bondModel.Securities = bond.Securities
-	// }
-
 	bondModel.MarketValPercent = bond.MarketValPercent
 
 	bondModel.Rate = bond.Rate
@@ -253,14 +185,6 @@ func mapBalancedHoldingSectorWeightBond(bond *domains.BalancedHoldingSectorWeigh
 
 func mapBalancedHoldingSectorWeightStock(equity *domains.BalancedHoldingSectorWeightStock) (*models.SectorWeightStockModel, error) {
 	var equityModel = &models.SectorWeightStockModel{}
-
-	// if equity.Currency != "" {
-	// 	equityModel.Currency = equity.Currency
-	// }
-
-	// if equity.Holding != "" {
-	// 	equityModel.Holding = equity.Holding
-	// }
 
 	if equity.Symbol != "" {
 		equityModel.Symbol = equity.Symbol

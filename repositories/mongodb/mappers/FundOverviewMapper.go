@@ -54,7 +54,7 @@ func MapFundOverviewDomain(fund *domains.FundOverview) (*models.FundOverviewMode
 		totalAssets, err := strconv.ParseFloat(fund.TotalAssets, 64)
 
 		if err != nil {
-			fmt.Println("error occurred when parsing totalAssets field", err)
+			fmt.Println("[warning] - error occurred when parsing totalAssets field", err)
 			totalAssets = 0
 		}
 
@@ -65,7 +65,7 @@ func MapFundOverviewDomain(fund *domains.FundOverview) (*models.FundOverviewMode
 		yield12Month, err := strconv.ParseFloat(fund.Yield12Month, 64)
 
 		if err != nil {
-			fmt.Println("error occurred when parsing yield12Month field", err)
+			fmt.Println("[warning] - error occurred when parsing yield12Month field", err)
 			yield12Month = 0
 		}
 
@@ -78,7 +78,7 @@ func MapFundOverviewDomain(fund *domains.FundOverview) (*models.FundOverviewMode
 		managementFee, err := strconv.ParseFloat(fund.ManagementFee, 64)
 
 		if err != nil {
-			fmt.Println("error occurred when parsing managementFee field", err)
+			fmt.Println("[warning] - error occurred when parsing managementFee field", err)
 			managementFee = 0
 		}
 
@@ -89,7 +89,7 @@ func MapFundOverviewDomain(fund *domains.FundOverview) (*models.FundOverviewMode
 		merValue, err := strconv.ParseFloat(fund.MerValue, 64)
 
 		if err != nil {
-			fmt.Println("error occurred when parsing merValue field", err)
+			fmt.Println("[warning] - error occurred when parsing merValue field", err)
 			merValue = 0
 		}
 
@@ -116,7 +116,9 @@ func MapFundOverviewDomain(fund *domains.FundOverview) (*models.FundOverviewMode
 			return nil, err
 		}
 
-		exposures = append(exposures, exposure)
+		if exposure != nil {
+			exposures = append(exposures, exposure)
+		}
 	}
 	fundOverview.CountryExposure = exposures
 
@@ -138,7 +140,7 @@ func mapSectorWeighting(sector *domains.SectorWeighting) (*models.SectorWeightin
 		fundPercent, err := strconv.ParseFloat(sector.FundPercent, 64)
 
 		if err != nil {
-			fmt.Println("error occurred when parsing fundPercent field", err)
+			fmt.Println("[warning] - error occurred when parsing fundPercent field", err)
 			fundPercent = 0
 		}
 
@@ -163,8 +165,12 @@ func mapCountryExposure(exposure *domains.CountryExposure) (*models.CountryExpos
 		mktPercent, err := strconv.ParseFloat(exposure.FundMktPercent, 64)
 
 		if err != nil {
-			fmt.Println("error occurred when parsing mktPercent field", err)
+			fmt.Println("[warning] - error occurred when parsing mktPercent field", err)
 			mktPercent = 0
+		}
+
+		if mktPercent == 0 {
+			return nil, nil
 		}
 
 		countryExposure.FundMktPercent = mktPercent
@@ -174,7 +180,7 @@ func mapCountryExposure(exposure *domains.CountryExposure) (*models.CountryExpos
 		tnaPercent, err := strconv.ParseFloat(exposure.FundTnaPercent, 64)
 
 		if err != nil {
-			fmt.Println("error occurred when parsing tnaPercent field", err)
+			fmt.Println("[warning] - error occurred when parsing tnaPercent field", err)
 			tnaPercent = 0
 		}
 
