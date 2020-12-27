@@ -8,6 +8,7 @@ type FundHoldingModel struct {
 	Schema       int                       `json:"schema,omitempty" bson:"schema,omitempty"`
 	IsActive     bool                      `json:"isActive,omitempty" bson:"isActive,omitempty"`
 	CreatedAt    int64                     `json:"createdAt,omitempty" bson:"createdAt,omitempty"`
+	ModifiedAt   int64                     `json:"modifiedAt,omitempty" bson:"modifiedAt,omitempty"`
 	PortID       string                    `json:"portId,omitempty" bson:"portId,omitempty"`
 	Ticker       string                    `json:"ticker,omitempty" bson:"ticker,omitempty"`
 	AssetCode    string                    `json:"assetCode,omitempty" bson:"assetCode,omitempty"`

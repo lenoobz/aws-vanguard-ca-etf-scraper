@@ -8,6 +8,7 @@ import (
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/consts"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/domains"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/repositories/mongodb/mappers"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -73,16 +74,33 @@ func NewFundRepo(db *mongo.Database) (*FundRepo, error) {
 // Implement interface
 ///////////////////////////////////////////////////////////////////////////////
 
+func (repo *FundRepo) isFundOverviewExisted(ticker string) (bool, error) {
+	// create new context for the query
+	ctx, cancel := createContext()
+	defer cancel()
+
+	// what collection we are going to use
+	col := repo.DB.Collection(consts.CollectionFundOverview)
+
+	filter := bson.D{{
+		Key:   "ticker",
+		Value: ticker,
+	}}
+
+	var fo *domains.FundOverview
+	if err := col.FindOne(ctx, filter).Decode(fo); err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
 // InsertFundOverview inserts new fund overview
 func (repo *FundRepo) InsertFundOverview(fo *domains.FundOverview) error {
 	fundOverview, err := mappers.MapFundOverviewDomain(fo)
 	if err != nil {
 		return err
 	}
-
-	fundOverview.IsActive = true
-	fundOverview.Schema = consts.SchemaVersion
-	fundOverview.CreatedAt = time.Now().UTC().Unix()
 
 	// create new context for the query
 	ctx, cancel := createContext()
@@ -91,10 +109,24 @@ func (repo *FundRepo) InsertFundOverview(fo *domains.FundOverview) error {
 	// what collection we are going to use
 	col := repo.DB.Collection(consts.CollectionFundOverview)
 
-	// insert options
-	insertOptions := options.InsertOne()
+	fundOverview.IsActive = true
+	fundOverview.Schema = consts.SchemaVersion
+	fundOverview.CreatedAt = time.Now().UTC().Unix()
+	fundOverview.ModifiedAt = time.Now().UTC().Unix()
 
-	_, err = col.InsertOne(ctx, fundOverview, insertOptions)
+	filter := bson.D{{
+		Key:   "ticker",
+		Value: fundOverview.Ticker,
+	}}
+
+	update := bson.D{{
+		Key:   "$set",
+		Value: fundOverview,
+	}}
+
+	opts := options.Update().SetUpsert(true)
+
+	_, err = col.UpdateOne(ctx, filter, update, opts)
 	if err != nil {
 		return err
 	}
@@ -109,10 +141,6 @@ func (repo *FundRepo) InsertFundHolding(fh *domains.FundHolding) error {
 		return err
 	}
 
-	fundHolding.IsActive = true
-	fundHolding.Schema = consts.SchemaVersion
-	fundHolding.CreatedAt = time.Now().UTC().Unix()
-
 	// create new context for the query
 	ctx, cancel := createContext()
 	defer cancel()
@@ -120,10 +148,24 @@ func (repo *FundRepo) InsertFundHolding(fh *domains.FundHolding) error {
 	// what collection we are going to use
 	col := repo.DB.Collection(consts.CollectionFundHolding)
 
-	// insert options
-	insertOptions := options.InsertOne()
+	fundHolding.IsActive = true
+	fundHolding.Schema = consts.SchemaVersion
+	fundHolding.CreatedAt = time.Now().UTC().Unix()
+	fundHolding.ModifiedAt = time.Now().UTC().Unix()
 
-	_, err = col.InsertOne(ctx, fundHolding, insertOptions)
+	filter := bson.D{{
+		Key:   "ticker",
+		Value: fundHolding.Ticker,
+	}}
+
+	update := bson.D{{
+		Key:   "$set",
+		Value: fundHolding,
+	}}
+
+	opts := options.Update().SetUpsert(true)
+
+	_, err = col.UpdateOne(ctx, filter, update, opts)
 	if err != nil {
 		return err
 	}

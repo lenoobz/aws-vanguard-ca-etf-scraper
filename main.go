@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/consts"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/repositories/mongodb/repos"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/scrapers"
@@ -34,4 +35,10 @@ func main() {
 	jobs.FundListCol.Wait()
 	jobs.FundOverviewCol.Wait()
 	jobs.FundHoldingCol.Wait()
+
+	lambda.Start(lambdaHandler)
+}
+
+func lambdaHandler() {
+	fmt.Println("lambda handler is called")
 }
