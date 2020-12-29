@@ -5,6 +5,9 @@ import "fmt"
 // SchemaVersion const
 const SchemaVersion = 1
 
+// CollectionFundList const
+const CollectionFundList = "fund_lists"
+
 // CollectionFundOverview const
 const CollectionFundOverview = "fund_overview"
 

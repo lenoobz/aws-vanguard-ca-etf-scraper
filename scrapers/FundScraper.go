@@ -26,7 +26,7 @@ func NewFundScraper(svc services.IFundService) *FundScraper {
 	fo := newFundOverviewScraper()
 	fh := newFundHoldingScraper()
 
-	fl.OnResponse(processFundListResponse(fo, fh))
+	fl.OnResponse(processFundListResponse(fo, fh, svc))
 	fo.OnResponse(processFundOverviewResponse(svc))
 	fh.OnResponse(processFundHoldingResponse(svc))
 
@@ -126,7 +126,7 @@ func newFundHoldingScraper() *colly.Collector {
 	return c
 }
 
-func processFundListResponse(fo, fh *colly.Collector) colly.ResponseCallback {
+func processFundListResponse(fo, fh *colly.Collector, svc services.IFundService) colly.ResponseCallback {
 	return func(r *colly.Response) {
 		rs := &domains.VanguardFunds{}
 		if err := json.Unmarshal(r.Body, rs); err != nil {
@@ -134,25 +134,29 @@ func processFundListResponse(fo, fh *colly.Collector) colly.ResponseCallback {
 			return
 		}
 
-		if err := handleFundList(rs, fo, fh); err != nil {
+		if err := handleFundList(rs, fo, fh, svc); err != nil {
 			fmt.Println("error occurred when processing fund list response", err)
 			return
 		}
 	}
 }
 
-func handleFundList(funds *domains.VanguardFunds, fo, fh *colly.Collector) error {
-	for key, element := range funds.IndividualFunds {
-		if element.Ticker != "" {
+func handleFundList(funds *domains.VanguardFunds, fo, fh *colly.Collector, svc services.IFundService) error {
+	for key, fund := range funds.IndividualFunds {
+		if fund.Ticker != "" {
+			if err := svc.CreateIndividualFund(&fund); err != nil {
+				return err
+			}
+
 			overviewURL := consts.GetFundOverviewURL(key)
 			overviewCTX := colly.NewContext()
 			fo.Request("GET", overviewURL, nil, overviewCTX, nil)
 
-			holdingURL := consts.GetFundHoldingURL(key, "F", element.AssetCode)
+			holdingURL := consts.GetFundHoldingURL(key, "F", fund.AssetCode)
 			holdingCTX := colly.NewContext()
 			holdingCTX.Put("portId", key)
-			holdingCTX.Put("ticker", element.Ticker)
-			holdingCTX.Put("assetCode", element.AssetCode)
+			holdingCTX.Put("ticker", fund.Ticker)
+			holdingCTX.Put("assetCode", fund.AssetCode)
 			fh.Request("GET", holdingURL, nil, holdingCTX, nil)
 		}
 	}

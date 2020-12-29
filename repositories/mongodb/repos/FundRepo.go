@@ -74,25 +74,43 @@ func NewFundRepo(db *mongo.Database) (*FundRepo, error) {
 // Implement interface
 ///////////////////////////////////////////////////////////////////////////////
 
-func (repo *FundRepo) isFundOverviewExisted(ticker string) (bool, error) {
+// InsertIndividualFund inserts new fund
+func (repo *FundRepo) InsertIndividualFund(f *domains.IndividualFund) error {
+	fund, err := mappers.MapIndividualFundDomain(f)
+	if err != nil {
+		return err
+	}
+
 	// create new context for the query
 	ctx, cancel := createContext()
 	defer cancel()
 
 	// what collection we are going to use
-	col := repo.DB.Collection(consts.CollectionFundOverview)
+	col := repo.DB.Collection(consts.CollectionFundList)
+
+	fund.IsActive = true
+	fund.Schema = consts.SchemaVersion
+	fund.CreatedAt = time.Now().UTC().Unix()
+	fund.ModifiedAt = time.Now().UTC().Unix()
 
 	filter := bson.D{{
 		Key:   "ticker",
-		Value: ticker,
+		Value: fund.Ticker,
 	}}
 
-	var fo *domains.FundOverview
-	if err := col.FindOne(ctx, filter).Decode(fo); err != nil {
-		return false, err
+	update := bson.D{{
+		Key:   "$set",
+		Value: fund,
+	}}
+
+	opts := options.Update().SetUpsert(true)
+
+	_, err = col.UpdateOne(ctx, filter, update, opts)
+	if err != nil {
+		return err
 	}
 
-	return true, nil
+	return nil
 }
 
 // InsertFundOverview inserts new fund overview

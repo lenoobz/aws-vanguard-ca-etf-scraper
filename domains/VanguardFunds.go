@@ -9,4 +9,5 @@ type VanguardFunds struct {
 type IndividualFund struct {
 	Ticker    string `json:"TICKER,omitempty"`
 	AssetCode string `json:"assetCode,omitempty"`
+	Name      string `json:"parentLongName,omitempty"`
 }

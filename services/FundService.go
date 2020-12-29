@@ -17,6 +17,11 @@ func NewFundService(fundRepo repositories.IFundRepository) *FundService {
 	}
 }
 
+// CreateIndividualFund creates fund
+func (svc *FundService) CreateIndividualFund(f *domains.IndividualFund) error {
+	return svc.fundRepo.InsertIndividualFund(f)
+}
+
 // CreateFundOverview creates fund overview
 func (svc *FundService) CreateFundOverview(fo *domains.FundOverview) error {
 	return svc.fundRepo.InsertFundOverview(fo)
