@@ -21,5 +21,29 @@ func MapIndividualFundDomain(fl *domains.IndividualFund) (*models.IndividualFund
 		fund.AssetCode = fl.AssetCode
 	}
 
+	if fl.Currency != "" {
+		fund.Currency = fl.Currency
+	}
+
+	if fl.IssueTypeCode != "" {
+		fund.IssueTypeCode = fl.IssueTypeCode
+	}
+
+	if fl.PortID != "" {
+		fund.PortID = fl.PortID
+	}
+
+	if fl.ProductType != "" {
+		fund.ProductType = fl.ProductType
+	}
+
+	if fl.ManagementFee != "" {
+		fund.ManagementFee = fl.ManagementFee
+	}
+
+	if fl.MerValue != "" {
+		fund.MerValue = fl.MerValue
+	}
+
 	return fund, nil
 }
