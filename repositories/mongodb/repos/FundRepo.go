@@ -21,6 +21,7 @@ type FundRepo struct {
 
 // NewFundRepo creates new fund mongo repo
 func NewFundRepo(db *mongo.Database) (*FundRepo, error) {
+	fmt.Println("Create new Fund Repo")
 	if db != nil {
 		return &FundRepo{
 			DB: db,

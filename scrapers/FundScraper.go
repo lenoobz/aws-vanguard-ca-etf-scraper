@@ -22,6 +22,8 @@ type FundScraper struct {
 
 // NewFundScraper create new fund scraper
 func NewFundScraper(svc services.IFundService) *FundScraper {
+	fmt.Println("Create new Fund Scraper")
+
 	fl := newFundListScraper()
 	fo := newFundOverviewScraper()
 	fh := newFundHoldingScraper()

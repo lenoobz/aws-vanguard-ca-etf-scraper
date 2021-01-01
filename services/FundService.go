@@ -1,6 +1,8 @@
 package services
 
 import (
+	"fmt"
+
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/domains"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/repositories"
 )
@@ -12,6 +14,8 @@ type FundService struct {
 
 // NewFundService create as new service
 func NewFundService(fundRepo repositories.IFundRepository) *FundService {
+	fmt.Println("Create new Fund Service")
+
 	return &FundService{
 		fundRepo: fundRepo,
 	}
