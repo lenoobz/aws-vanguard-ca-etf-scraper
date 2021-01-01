@@ -6,13 +6,13 @@ import "fmt"
 const SchemaVersion = 1
 
 // CollectionFundList const
-const CollectionFundList = "fund_lists"
+const CollectionFundList = "vanguard_fund_lists"
 
 // CollectionFundOverview const
-const CollectionFundOverview = "fund_overview"
+const CollectionFundOverview = "vanguard_fund_overview"
 
 // CollectionFundHolding const
-const CollectionFundHolding = "fund_holding"
+const CollectionFundHolding = "vanguard_fund_holding"
 
 // TimeoutMS const
 const TimeoutMS = 360000
