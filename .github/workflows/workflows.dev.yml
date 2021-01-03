@@ -44,7 +44,7 @@ jobs:
           aws-region: ${{ secrets.DEV_AWS_REGION }}
 
       - name: Upload to s3 bucket
-        run: aws s3 cp ./main.zip s3://tf-fund-lambdas-storage/dev/${{ secrets.DEV_FUNCTION_NAME }}/main.zip
+        run: aws s3 cp ./main.zip s3://tf-fund-lambdas-storage/dev-${{ secrets.FUNCTION_NAME }}.zip
 
       - name: Update lamdba function
-        run: aws lambda update-function-code --function-name dev-${{ secrets.DEV_FUNCTION_NAME }} --zip-file fileb://main.zip
+        run: aws lambda update-function-code --function-name dev-${{ secrets.FUNCTION_NAME }} --zip-file fileb://main.zip
