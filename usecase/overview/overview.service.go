@@ -3,18 +3,18 @@ package overview
 import (
 	"context"
 
+	logger "github.com/hthl85/aws-lambda-logger"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/entities"
-	"github.com/hthl85/aws-vanguard-ca-etf-scraper/usecase/logger"
 )
 
 // Service sector
 type Service struct {
-	repo IOverviewRepo
-	log  logger.IAppLogger
+	repo Repo
+	log  logger.ContextLog
 }
 
-// NewOverviewService create new service
-func NewOverviewService(r IOverviewRepo, l logger.IAppLogger) *Service {
+// NewService create new service
+func NewService(r Repo, l logger.ContextLog) *Service {
 	return &Service{
 		repo: r,
 		log:  l,
@@ -22,7 +22,7 @@ func NewOverviewService(r IOverviewRepo, l logger.IAppLogger) *Service {
 }
 
 // CreateOverview creates new overview
-func (s *Service) CreateOverview(ctx context.Context, overview *entities.Overview) error {
+func (s *Service) CreateOverview(ctx context.Context, e *entities.VanguardFundOverview) error {
 	s.log.Info(ctx, "create new overview")
-	return s.repo.InsertOverview(ctx, overview)
+	return s.repo.InsertOverview(ctx, e)
 }

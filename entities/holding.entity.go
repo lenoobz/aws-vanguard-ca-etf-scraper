@@ -1,71 +1,75 @@
 package entities
 
-// Holding represents Vanguard's fund holding details
-type Holding struct {
-	PortID          string             `json:"portId,omitempty"`
-	Ticker          string             `json:"ticker,omitempty"`
-	AssetCode       string             `json:"assetCode,omitempty"`
-	BondHolding     []*BondHolding     `json:"bondHolding,omitempty"`
-	EquityHolding   []*EquityHolding   `json:"equityHolding,omitempty"`
-	BalancedHolding []*BalancedHolding `json:"balancedHolding,omitempty"`
+import "encoding/json"
+
+// VanguardFundHolding represents Vanguard fund holding entity
+type VanguardFundHolding struct {
+	PortID    string             `json:"portId,omitempty"`
+	Ticker    string             `json:"ticker,omitempty"`
+	AssetCode string             `json:"assetCode,omitempty"`
+	Bonds     []*BondHolding     `json:"bondHolding,omitempty"`
+	Equities  []*EquityHolding   `json:"equityHolding,omitempty"`
+	Balances  []*BalancedHolding `json:"balancedHolding,omitempty"`
 }
 
-///////////////////////////////////////////////////////////
-// BondHolding struct and its dependent structs
-///////////////////////////////////////////////////////////
-
-// BondHolding represents bond holding details of a fund
+// BondHolding represents fund bond holding details
 type BondHolding struct {
-	SectorWeightBond []*BondHoldingSectorWeightBond `json:"sectorWeightBond,omitempty"`
+	SectorWeightBond []*SectorWeightBond `json:"sectorWeightBond,omitempty"`
 }
 
-// BondHoldingSectorWeightBond struct
-type BondHoldingSectorWeightBond struct {
-	FaceAmount       float64 `json:"faceAmount,omitempty"`
-	MarketValPercent string  `json:"marketValPercent,omitempty"`
-	MarketValue      float64 `json:"marketValue,omitempty"`
-	Rate             float64 `json:"rate,omitempty"`
-}
-
-///////////////////////////////////////////////////////////
-// EquityHolding struct and its dependent structs
-///////////////////////////////////////////////////////////
-
-// EquityHolding represents equity holding details of a fund
+// EquityHolding represents fund equity holding details
 type EquityHolding struct {
-	SectorWeightStock []*EquityHoldingSectorWeightStock `json:"sectorWeightStock,omitempty"`
+	SectorWeightStock []*SectorWeightStock `json:"sectorWeightStock,omitempty"`
 }
 
-// EquityHoldingSectorWeightStock struct
-type EquityHoldingSectorWeightStock struct {
-	MarketValPercent string  `json:"marketValPercent,omitempty"`
-	MarketValue      string  `json:"marketValue,omitempty"`
-	Shares           float64 `json:"shares,omitempty"`
-	Symbol           string  `json:"symbol,omitempty"`
-}
-
-///////////////////////////////////////////////////////////
-// BalancedHolding struct and its dependent structs
-///////////////////////////////////////////////////////////
-
-// BalancedHolding represents balance holding details of a fund
+// BalancedHolding represents fund balance holding details
 type BalancedHolding struct {
-	SectorWeightBond  []*BalancedHoldingSectorWeightBond  `json:"sectorWeightBond,omitempty"`
-	SectorWeightStock []*BalancedHoldingSectorWeightStock `json:"sectorWeightStock,omitempty"`
+	SectorWeightBond  []*SectorWeightBond  `json:"sectorWeightBond,omitempty"`
+	SectorWeightStock []*SectorWeightStock `json:"sectorWeightStock,omitempty"`
 }
 
-// BalancedHoldingSectorWeightBond struct
-type BalancedHoldingSectorWeightBond struct {
-	MarketValPercent float64 `json:"marketValPercent,omitempty"`
-	Rate             float64 `json:"rate,omitempty"`
-	Type             string  `json:"type,omitempty"`
+///////////////////////////////////////////////////////////
+// Holding detail inner structs
+///////////////////////////////////////////////////////////
+
+// SectorWeightBond struct
+type SectorWeightBond struct {
+	MarketValPercent json.Number `json:"marketValPercent,omitempty"`
+	MarketValue      json.Number `json:"marketValue,omitempty"`
+	Rate             float64     `json:"rate,omitempty"`
+	FaceAmount       float64     `json:"faceAmount,omitempty"`
+	Type             string      `json:"type,omitempty"`
+
+	// Bond holding bond
+	// FaceAmount       float64 `json:"faceAmount,omitempty"`
+	// MarketValPercent string  `json:"marketValPercent,omitempty"`
+	// MarketValue      float64 `json:"marketValue,omitempty"`
+	// Rate             float64 `json:"rate,omitempty"`
+
+	// Balance holding bond
+	// MarketValPercent float64 `json:"marketValPercent,omitempty"`
+	// Rate             float64 `json:"rate,omitempty"`
+	// Type             string  `json:"type,omitempty"`
 }
 
-// BalancedHoldingSectorWeightStock struct
-type BalancedHoldingSectorWeightStock struct {
-	MarketValPercent float64 `json:"marketValPercent,omitempty"`
-	MarketValue      float64 `json:"marketValue,omitempty"`
-	Shares           float64 `json:"shares,omitempty"`
-	Symbol           string  `json:"symbol,omitempty"`
-	Type             string  `json:"type,omitempty"`
+// SectorWeightStock struct
+type SectorWeightStock struct {
+	MarketValPercent json.Number `json:"marketValPercent,omitempty"`
+	MarketValue      json.Number `json:"marketValue,omitempty"`
+	Shares           float64     `json:"shares,omitempty"`
+	Symbol           string      `json:"symbol,omitempty"`
+	Type             string      `json:"type,omitempty"`
+
+	// Equity holding stock
+	// MarketValPercent string  `json:"marketValPercent,omitempty"`
+	// MarketValue      string  `json:"marketValue,omitempty"`
+	// Shares           float64 `json:"shares,omitempty"`
+	// Symbol           string  `json:"symbol,omitempty"`
+
+	// Balanced holding stock
+	// MarketValPercent float64 `json:"marketValPercent,omitempty"`
+	// MarketValue      float64 `json:"marketValue,omitempty"`
+	// Shares           float64 `json:"shares,omitempty"`
+	// Symbol           string  `json:"symbol,omitempty"`
+	// Type             string  `json:"type,omitempty"`
 }

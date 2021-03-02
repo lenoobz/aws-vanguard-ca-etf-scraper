@@ -4,142 +4,141 @@ import (
 	"context"
 	"strconv"
 
+	logger "github.com/hthl85/aws-lambda-logger"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/entities"
-	"github.com/hthl85/aws-vanguard-ca-etf-scraper/usecase/logger"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// OverviewModel represents Vanguard's fund overview details model
-type OverviewModel struct {
-	ID               *primitive.ObjectID     `json:"id,omitempty" bson:"_id,omitempty"`
-	IsActive         bool                    `json:"isActive,omitempty" bson:"isActive,omitempty"`
-	CreatedAt        int64                   `json:"createdAt,omitempty" bson:"createdAt,omitempty"`
-	ModifiedAt       int64                   `json:"modifiedAt,omitempty" bson:"modifiedAt,omitempty"`
-	Schema           string                  `json:"schema,omitempty" bson:"schema,omitempty"`
-	PortID           string                  `json:"portId,omitempty" bson:"portId,omitempty"`
-	AssetClass       string                  `json:"assetClass,omitempty" bson:"assetClass,omitempty"`
-	Strategy         string                  `json:"strategy,omitempty" bson:"strategy,omitempty"`
-	DividendSchedule string                  `json:"dividendSchedule,omitempty" bson:"dividendSchedule,omitempty"`
-	ShortName        string                  `json:"shortName,omitempty" bson:"shortName,omitempty"`
-	Currency         string                  `json:"baseCurrency,omitempty" bson:"baseCurrency,omitempty"`
-	Isin             string                  `json:"isin,omitempty" bson:"isin,omitempty"`
-	Sedol            string                  `json:"sedol,omitempty" bson:"sedol,omitempty"`
-	Ticker           string                  `json:"ticker,omitempty" bson:"ticker,omitempty"`
-	TotalAssets      float64                 `json:"totalAssets,omitempty" bson:"totalAssets,omitempty"`
-	Yield12Month     float64                 `json:"yield12Month,omitempty" bson:"yield12Month,omitempty"`
-	Price            float64                 `json:"price,omitempty" bson:"price,omitempty"`
-	ManagementFee    float64                 `json:"managementFee,omitempty" bson:"managementFee,omitempty"`
-	MerValue         float64                 `json:"merValue,omitempty" bson:"merValue,omitempty"`
-	SectorWeighting  []*SectorWeightingModel `json:"sectorWeighting,omitempty" bson:"sectorWeighting,omitempty"`
-	CountryExposure  []*CountryExposureModel `json:"countryExposure,omitempty" bson:"countryExposure,omitempty"`
+// VanguardOverviewModel represents Vanguard fund overview model
+type VanguardOverviewModel struct {
+	ID               *primitive.ObjectID      `bson:"_id,omitempty"`
+	IsActive         bool                     `bson:"isActive,omitempty"`
+	CreatedAt        int64                    `bson:"createdAt,omitempty"`
+	ModifiedAt       int64                    `bson:"modifiedAt,omitempty"`
+	Schema           string                   `bson:"schema,omitempty"`
+	PortID           string                   `bson:"portId,omitempty"`
+	AssetClass       string                   `bson:"assetClass,omitempty"`
+	Strategy         string                   `bson:"strategy,omitempty"`
+	DividendSchedule string                   `bson:"dividendSchedule,omitempty"`
+	Name             string                   `bson:"name,omitempty"`
+	Currency         string                   `bson:"currency,omitempty"`
+	Isin             string                   `bson:"isin,omitempty"`
+	Sedol            string                   `bson:"sedol,omitempty"`
+	Ticker           string                   `bson:"ticker,omitempty"`
+	TotalAssets      float64                  `bson:"totalAssets,omitempty"`
+	Yield12Month     float64                  `bson:"yield12Month,omitempty"`
+	Price            float64                  `bson:"price,omitempty"`
+	ManagementFee    float64                  `bson:"managementFee,omitempty"`
+	MerFee           float64                  `bson:"merFee,omitempty"`
+	Sectors          []*SectorBreakdownModel  `bson:"sectorBreakdown,omitempty"`
+	Countries        []*CountryBreakdownModel `bson:"countryBreakdown,omitempty"`
 }
 
-// SectorWeightingModel is the representation of sector the fund invested
-type SectorWeightingModel struct {
-	FundPercent float64 `json:"fundPercent,omitempty" bson:"fundPercent,omitempty"`
-	LongName    string  `json:"longName,omitempty" bson:"longName,omitempty"`
-	SectorType  string  `json:"sectorType,omitempty" bson:"sectorType,omitempty"`
+// SectorBreakdownModel is the representation of sector the fund invested
+type SectorBreakdownModel struct {
+	FundPercent float64 `bson:"fundPercent,omitempty"`
+	SectorName  string  `bson:"sectorName,omitempty"`
 }
 
-// CountryExposureModel is the representation of country the fund exposed
-type CountryExposureModel struct {
-	CountryName     string  `json:"countryName,omitempty" bson:"countryName,omitempty"`
-	HoldingStatCode string  `json:"holdingStatCode,omitempty" bson:"holdingStatCode,omitempty"`
-	FundMktPercent  float64 `json:"fundMktPercent,omitempty" bson:"fundMktPercent,omitempty"`
-	FundTnaPercent  float64 `json:"fundTnaPercent,omitempty" bson:"fundTnaPercent,omitempty"`
+// CountryBreakdownModel is the representation of country the fund exposed
+type CountryBreakdownModel struct {
+	CountryName     string  `bson:"countryName,omitempty"`
+	FundMktPercent  float64 `bson:"fundMktPercent,omitempty"`
+	FundTnaPercent  float64 `bson:"fundTnaPercent,omitempty"`
+	HoldingStatCode string  `bson:"holdingStatCode,omitempty"`
 }
 
 // NewOverviewModel create a fund overview model
-func NewOverviewModel(ctx context.Context, log logger.IAppLogger, o *entities.Overview) (*OverviewModel, error) {
-	var fundOverview = &OverviewModel{}
+func NewOverviewModel(ctx context.Context, log logger.ContextLog, e *entities.VanguardFundOverview) (*VanguardOverviewModel, error) {
+	var m = &VanguardOverviewModel{}
 
-	if o.PortID != "" {
-		fundOverview.PortID = o.PortID
+	if e.PortID != "" {
+		m.PortID = e.PortID
 	}
 
-	if o.AssetClass != "" {
-		fundOverview.AssetClass = o.AssetClass
+	if e.AssetClass != "" {
+		m.AssetClass = e.AssetClass
 	}
 
-	if o.Strategy != "" {
-		fundOverview.Strategy = o.Strategy
+	if e.Strategy != "" {
+		m.Strategy = e.Strategy
 	}
 
-	if o.DividendSchedule != "" {
-		fundOverview.DividendSchedule = o.DividendSchedule
+	if e.DividendSchedule != "" {
+		m.DividendSchedule = e.DividendSchedule
 	}
 
-	if o.ShortName != "" {
-		fundOverview.ShortName = o.ShortName
+	if e.ShortName != "" {
+		m.Name = e.ShortName
 	}
 
-	if o.BaseCurrency != "" {
-		fundOverview.Currency = o.BaseCurrency
+	if e.BaseCurrency != "" {
+		m.Currency = e.BaseCurrency
 	}
 
-	if o.FundCodesData != nil {
-		if o.FundCodesData.Isin != "" {
-			fundOverview.Isin = o.FundCodesData.Isin
+	if e.FundCode != nil {
+		if e.FundCode.Isin != "" {
+			m.Isin = e.FundCode.Isin
 		}
 
-		if o.FundCodesData.Sedol != "" {
-			fundOverview.Sedol = o.FundCodesData.Sedol
+		if e.FundCode.Sedol != "" {
+			m.Sedol = e.FundCode.Sedol
 		}
 
-		if o.FundCodesData.ExchangeTicker != "" {
-			fundOverview.Ticker = o.FundCodesData.ExchangeTicker
+		if e.FundCode.ExchangeTicker != "" {
+			m.Ticker = e.FundCode.ExchangeTicker
 		}
 	}
 
-	if o.TotalAssets != "" {
-		totalAssets, err := strconv.ParseFloat(o.TotalAssets, 64)
+	if e.TotalAssets != "" {
+		ta, err := strconv.ParseFloat(e.TotalAssets, 64)
 
 		if err != nil {
-			log.Warn(ctx, "parse Overview.TotalAssets failed", "err", err, "TotalAssets", o.TotalAssets)
-			totalAssets = 0
+			log.Warn(ctx, "parse Overview.TotalAssets failed", "err", err, "TotalAssets", e.TotalAssets)
+			ta = 0
 		}
 
-		fundOverview.TotalAssets = totalAssets
+		m.TotalAssets = ta
 	}
 
-	if o.Yield12Month != "" {
-		yield12Month, err := strconv.ParseFloat(o.Yield12Month, 64)
+	if e.Yield12Month != "" {
+		ym, err := strconv.ParseFloat(e.Yield12Month, 64)
 
 		if err != nil {
-			log.Warn(ctx, "parse Overview.Yield12Month failed", "err", err, "Yield12Month", o.Yield12Month)
-			yield12Month = 0
+			log.Warn(ctx, "parse Overview.Yield12Month failed", "err", err, "Yield12Month", e.Yield12Month)
+			ym = 0
 		}
 
-		fundOverview.Yield12Month = yield12Month
+		m.Yield12Month = ym
 	}
 
-	fundOverview.Price = o.Price
+	m.Price = e.Price
 
-	if o.ManagementFee != "" {
-		managementFee, err := strconv.ParseFloat(o.ManagementFee, 64)
+	if e.ManagementFee != "" {
+		v, err := strconv.ParseFloat(e.ManagementFee, 64)
 
 		if err != nil {
-			log.Warn(ctx, "parse Overview.ManagementFee failed", "err", err, "ManagementFee", o.ManagementFee)
-			managementFee = 0
+			log.Warn(ctx, "parse Overview.ManagementFee failed", "err", err, "ManagementFee", e.ManagementFee)
+			v = 0
 		}
 
-		fundOverview.ManagementFee = managementFee
+		m.ManagementFee = v
 	}
 
-	if o.MerValue != "" {
-		merValue, err := strconv.ParseFloat(o.MerValue, 64)
+	if e.MerFee != "" {
+		v, err := strconv.ParseFloat(e.MerFee, 64)
 
 		if err != nil {
-			log.Warn(ctx, "parse Overview.MerValue failed", "err", err, "MerValue", o.MerValue)
-			merValue = 0
+			log.Warn(ctx, "parse Overview.MerValue failed", "err", err, "MerValue", e.MerFee)
+			v = 0
 		}
 
-		fundOverview.MerValue = merValue
+		m.MerFee = v
 	}
 
-	var sectors []*SectorWeightingModel
-	for _, v := range o.SectorWeighting {
-		sector, err := newSectorWeightingModel(ctx, log, v)
+	var sectors []*SectorBreakdownModel
+	for _, s := range e.Sectors {
+		sector, err := newSectorBreakdownModel(ctx, log, s)
 
 		if err != nil {
 			return nil, err
@@ -147,86 +146,82 @@ func NewOverviewModel(ctx context.Context, log logger.IAppLogger, o *entities.Ov
 
 		sectors = append(sectors, sector)
 	}
-	fundOverview.SectorWeighting = sectors
+	m.Sectors = sectors
 
-	var exposures []*CountryExposureModel
-	for _, v := range o.CountryExposure {
-		exposure, err := newCountryExposureModel(ctx, log, v)
+	var countries []*CountryBreakdownModel
+	for _, c := range e.Countries {
+		country, err := newCountryBreakdownModel(ctx, log, c)
 
 		if err != nil {
 			return nil, err
 		}
 
-		if exposure != nil {
-			exposures = append(exposures, exposure)
+		if country != nil {
+			countries = append(countries, country)
 		}
 	}
-	fundOverview.CountryExposure = exposures
+	m.Countries = countries
 
-	return fundOverview, nil
+	return m, nil
 }
 
-func newSectorWeightingModel(ctx context.Context, log logger.IAppLogger, sector *entities.SectorWeighting) (*SectorWeightingModel, error) {
-	var sectorWeighting = &SectorWeightingModel{}
+func newSectorBreakdownModel(ctx context.Context, log logger.ContextLog, e *entities.SectorBreakdown) (*SectorBreakdownModel, error) {
+	var m = &SectorBreakdownModel{}
 
-	if sector.LongName != "" {
-		sectorWeighting.LongName = sector.LongName
+	if e.SectorName != "" {
+		m.SectorName = e.SectorName
 	}
 
-	if sector.SectorType != "" {
-		sectorWeighting.SectorType = sector.SectorType
-	}
-
-	if sector.FundPercent != "" {
-		fundPercent, err := strconv.ParseFloat(sector.FundPercent, 64)
+	if e.FundPercent != "" {
+		v, err := strconv.ParseFloat(e.FundPercent, 64)
 
 		if err != nil {
-			log.Warn(ctx, "parse SectorWeighting.FundPercent failed", "err", err, "FundPercent", sector.FundPercent)
-			fundPercent = 0
+			log.Warn(ctx, "parse SectorWeighting.FundPercent failed", "err", err, "FundPercent", e.FundPercent)
+			v = 0
 		}
 
-		sectorWeighting.FundPercent = fundPercent
+		m.FundPercent = v
 	}
 
-	return sectorWeighting, nil
+	return m, nil
 }
 
-func newCountryExposureModel(ctx context.Context, log logger.IAppLogger, exposure *entities.CountryExposure) (*CountryExposureModel, error) {
-	var countryExposure = &CountryExposureModel{}
+func newCountryBreakdownModel(ctx context.Context, log logger.ContextLog, e *entities.CountryBreakdown) (*CountryBreakdownModel, error) {
+	var m = &CountryBreakdownModel{}
 
-	if exposure.CountryName != "" {
-		countryExposure.CountryName = exposure.CountryName
+	if e.CountryName != "" {
+		m.CountryName = e.CountryName
 	}
 
-	if exposure.HoldingStatCode != "" {
-		countryExposure.HoldingStatCode = exposure.HoldingStatCode
+	if e.HoldingStatCode != "" {
+		m.HoldingStatCode = e.HoldingStatCode
 	}
 
-	if exposure.FundMktPercent != "" {
-		mktPercent, err := strconv.ParseFloat(exposure.FundMktPercent, 64)
+	if e.FundMktPercent != "" {
+		v, err := strconv.ParseFloat(e.FundMktPercent, 64)
 
 		if err != nil {
-			log.Warn(ctx, "parse CountryExposure.FundMktPercent failed", "err", err, "FundMktPercent", exposure.FundMktPercent)
-			mktPercent = 0
+			log.Warn(ctx, "parse CountryExposure.FundMktPercent failed", "err", err, "FundMktPercent", e.FundMktPercent)
+			v = 0
 		}
 
-		if mktPercent == 0 {
+		if v == 0 {
 			return nil, nil
 		}
 
-		countryExposure.FundMktPercent = mktPercent
+		m.FundMktPercent = v
 	}
 
-	if exposure.FundTnaPercent != "" {
-		tnaPercent, err := strconv.ParseFloat(exposure.FundTnaPercent, 64)
+	if e.FundTnaPercent != "" {
+		v, err := strconv.ParseFloat(e.FundTnaPercent, 64)
 
 		if err != nil {
-			log.Warn(ctx, "parse CountryExposure.FundTnaPercent failed", "err", err, "FundTnaPercent", exposure.FundTnaPercent)
-			tnaPercent = 0
+			log.Warn(ctx, "parse CountryExposure.FundTnaPercent failed", "err", err, "FundTnaPercent", e.FundTnaPercent)
+			v = 0
 		}
 
-		countryExposure.FundTnaPercent = tnaPercent
+		m.FundTnaPercent = v
 	}
 
-	return countryExposure, nil
+	return m, nil
 }

@@ -3,18 +3,18 @@ package holding
 import (
 	"context"
 
+	logger "github.com/hthl85/aws-lambda-logger"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/entities"
-	"github.com/hthl85/aws-vanguard-ca-etf-scraper/usecase/logger"
 )
 
 // Service sector
 type Service struct {
-	repo IHoldingRepo
-	log  logger.IAppLogger
+	repo Repo
+	log  logger.ContextLog
 }
 
-// NewHoldingService create new service
-func NewHoldingService(r IHoldingRepo, l logger.IAppLogger) *Service {
+// NewService create new service
+func NewService(r Repo, l logger.ContextLog) *Service {
 	return &Service{
 		repo: r,
 		log:  l,
@@ -22,7 +22,7 @@ func NewHoldingService(r IHoldingRepo, l logger.IAppLogger) *Service {
 }
 
 // CreateHolding creates new holding
-func (s *Service) CreateHolding(ctx context.Context, holding *entities.Holding) error {
+func (s *Service) CreateHolding(ctx context.Context, e *entities.VanguardFundHolding) error {
 	s.log.Info(ctx, "create new holding")
-	return s.repo.InsertHolding(ctx, holding)
+	return s.repo.InsertHolding(ctx, e)
 }

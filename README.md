@@ -6,13 +6,13 @@ The lambda function to scrape `Vanguard Canada ETF` data and extract interested 
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 - [Overview](#overview)
-    - [Technical Summary](#technical-summary)
-    - [Vanguard Endpoints](#vanguard-endpoints)
+  - [Technical Summary](#technical-summary)
+  - [Vanguard Endpoints](#vanguard-endpoints)
 - [Project Structure](#project-structure)
 - [Usage](#usage)
-    - [Build lambda function](#build-lambda-function)
-    - [Build cmd](#build-cmd)
-    - [Clean up](#clean-up)
+  - [Build lambda function](#build-lambda-function)
+  - [Build cmd](#build-cmd)
+  - [Clean up](#clean-up)
 - [How To](#how-to)
   - [Add new build environment](#add-new-build-environment)
 - [Contributing](#contributing)
@@ -24,9 +24,9 @@ The lambda function to scrape `Vanguard Canada ETF` data and extract interested 
 
 #### Technical Summary
 
-The lambda function is just one of the step in the `state machine` which was configurated in the `povi-infrastructure` project.
+This lambda function is the starting point of a `state machine` which is used to scrape data from Vanguard Canada data.
 
-That `state machine` will be scheduled to run `Every Monday` and this lambda function will be triggered to scrape `Vanguard Canada ETF` data.
+The `state machine` was configurated in the `povi-infrastructure` project and was scheduled to run `Every Monday`. When the `state machine` is executed, this lambda function will be triggered.
 
 The lambda function will scrape `Fund List`, `Fund Overview`, and `Fund Holding` data from the Vanguard Canada endpoints listed bellow.
 

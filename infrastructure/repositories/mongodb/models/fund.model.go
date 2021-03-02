@@ -5,63 +5,63 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// FundModel represents Vanguard's individual fund model
-type FundModel struct {
-	ID            *primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
-	IsActive      bool                `json:"isActive,omitempty" bson:"isActive,omitempty"`
-	CreatedAt     int64               `json:"createdAt,omitempty" bson:"createdAt,omitempty"`
-	ModifiedAt    int64               `json:"modifiedAt,omitempty" bson:"modifiedAt,omitempty"`
-	Schema        string              `json:"schema,omitempty" bson:"schema,omitempty"`
-	Ticker        string              `json:"TICKER,omitempty" bson:"ticker,omitempty"`
-	AssetCode     string              `json:"assetCode,omitempty" bson:"assetCode,omitempty"`
-	Name          string              `json:"parentLongName,omitempty" bson:"name,omitempty"`
-	Currency      string              `json:"currency,omitempty" bson:"currency,omitempty"`
-	IssueTypeCode string              `json:"issueTypeCode,omitempty" bson:"issueTypeCode,omitempty"`
-	PortID        string              `json:"portId,omitempty" bson:"portId,omitempty"`
-	ProductType   string              `json:"productType,omitempty" bson:"productType,omitempty"`
-	ManagementFee string              `json:"managementFee,omitempty" bson:"managementFee,omitempty"`
-	MerValue      string              `json:"merValue,omitempty" bson:"merValue,omitempty"`
+// VanguardFundModel represents a Vanguard fund model
+type VanguardFundModel struct {
+	ID            *primitive.ObjectID `bson:"_id,omitempty"`
+	IsActive      bool                `bson:"isActive,omitempty"`
+	CreatedAt     int64               `bson:"createdAt,omitempty"`
+	ModifiedAt    int64               `bson:"modifiedAt,omitempty"`
+	Schema        string              `bson:"schema,omitempty"`
+	Ticker        string              `bson:"ticker,omitempty"`
+	AssetCode     string              `bson:"assetCode,omitempty"`
+	Name          string              `bson:"name,omitempty"`
+	Currency      string              `bson:"currency,omitempty"`
+	IssueType     string              `bson:"issueType,omitempty"`
+	PortID        string              `bson:"portId,omitempty"`
+	ProductType   string              `bson:"productType,omitempty"`
+	ManagementFee string              `bson:"managementFee,omitempty"`
+	MerFee        string              `bson:"merFee,omitempty"`
 }
 
-// NewFundModel create a fund model
-func NewFundModel(f *entities.Fund) (*FundModel, error) {
-	var fund = &FundModel{}
+// NewVanguardFundModel create Vanguard fund model
+func NewVanguardFundModel(e *entities.VanguardFund) (*VanguardFundModel, error) {
+	var m = &VanguardFundModel{}
 
-	if f.Ticker != "" {
-		fund.Ticker = f.Ticker
+	if e.Ticker != "" {
+		m.Ticker = e.Ticker
 	}
 
-	if f.Name != "" {
-		fund.Name = f.Name
+	if e.Name != "" {
+		m.Name = e.Name
 	}
 
-	if f.AssetCode != "" {
-		fund.AssetCode = f.AssetCode
+	if e.AssetCode != "" {
+		m.AssetCode = e.AssetCode
 	}
 
-	if f.Currency != "" {
-		fund.Currency = f.Currency
+	if e.Currency != "" {
+		m.Currency = e.Currency
 	}
 
-	if f.IssueTypeCode != "" {
-		fund.IssueTypeCode = f.IssueTypeCode
+	if e.IssueType != "" {
+		m.IssueType = e.IssueType
 	}
 
-	if f.PortID != "" {
-		fund.PortID = f.PortID
+	if e.PortID != "" {
+		m.PortID = e.PortID
 	}
 
-	if f.ProductType != "" {
-		fund.ProductType = f.ProductType
+	if e.ProductType != "" {
+		m.ProductType = e.ProductType
 	}
 
-	if f.ManagementFee != "" {
-		fund.ManagementFee = f.ManagementFee
+	if e.ManagementFee != "" {
+		m.ManagementFee = e.ManagementFee
 	}
 
-	if f.MerValue != "" {
-		fund.MerValue = f.MerValue
+	if e.MerFee != "" {
+		m.MerFee = e.MerFee
 	}
 
-	return fund, nil
+	return m, nil
 }

@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	logger "github.com/hthl85/aws-lambda-logger"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/config"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/entities"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/infrastructure/repositories/mongodb/models"
-	"github.com/hthl85/aws-vanguard-ca-etf-scraper/usecase/logger"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -18,12 +18,12 @@ import (
 type FundMongo struct {
 	db     *mongo.Database
 	client *mongo.Client
-	log    logger.IAppLogger
+	log    logger.ContextLog
 	conf   *config.MongoConfig
 }
 
 // NewFundMongo creates new fund mongo repo
-func NewFundMongo(db *mongo.Database, l logger.IAppLogger, conf *config.MongoConfig) (*FundMongo, error) {
+func NewFundMongo(db *mongo.Database, l logger.ContextLog, conf *config.MongoConfig) (*FundMongo, error) {
 	if db != nil {
 		return &FundMongo{
 			db:   db,
@@ -91,12 +91,12 @@ func (r *FundMongo) Close() {
 ///////////////////////////////////////////////////////////////////////////////
 
 // InsertFund inserts new fund
-func (r *FundMongo) InsertFund(ctx context.Context, f *entities.Fund) error {
+func (r *FundMongo) InsertFund(ctx context.Context, e *entities.VanguardFund) error {
 	// create new context for the query
 	ctx, cancel := createContext(ctx, r.conf.TimeoutMS)
 	defer cancel()
 
-	fund, err := models.NewFundModel(f)
+	m, err := models.NewVanguardFundModel(e)
 	if err != nil {
 		return err
 	}
@@ -108,19 +108,19 @@ func (r *FundMongo) InsertFund(ctx context.Context, f *entities.Fund) error {
 	}
 	col := r.db.Collection(colname)
 
-	fund.IsActive = true
-	fund.Schema = r.conf.SchemaVersion
-	fund.CreatedAt = time.Now().UTC().Unix()
-	fund.ModifiedAt = time.Now().UTC().Unix()
+	m.IsActive = true
+	m.Schema = r.conf.SchemaVersion
+	m.CreatedAt = time.Now().UTC().Unix()
+	m.ModifiedAt = time.Now().UTC().Unix()
 
 	filter := bson.D{{
 		Key:   "ticker",
-		Value: fund.Ticker,
+		Value: m.Ticker,
 	}}
 
 	update := bson.D{{
 		Key:   "$set",
-		Value: fund,
+		Value: m,
 	}}
 
 	opts := options.Update().SetUpsert(true)
@@ -134,12 +134,12 @@ func (r *FundMongo) InsertFund(ctx context.Context, f *entities.Fund) error {
 }
 
 // InsertOverview inserts fund overview
-func (r *FundMongo) InsertOverview(ctx context.Context, o *entities.Overview) error {
+func (r *FundMongo) InsertOverview(ctx context.Context, e *entities.VanguardFundOverview) error {
 	// create new context for the query
 	ctx, cancel := createContext(ctx, r.conf.TimeoutMS)
 	defer cancel()
 
-	fundOverview, err := models.NewOverviewModel(ctx, r.log, o)
+	m, err := models.NewOverviewModel(ctx, r.log, e)
 	if err != nil {
 		return err
 	}
@@ -151,19 +151,19 @@ func (r *FundMongo) InsertOverview(ctx context.Context, o *entities.Overview) er
 	}
 	col := r.db.Collection(colname)
 
-	fundOverview.IsActive = true
-	fundOverview.Schema = r.conf.SchemaVersion
-	fundOverview.CreatedAt = time.Now().UTC().Unix()
-	fundOverview.ModifiedAt = time.Now().UTC().Unix()
+	m.IsActive = true
+	m.Schema = r.conf.SchemaVersion
+	m.CreatedAt = time.Now().UTC().Unix()
+	m.ModifiedAt = time.Now().UTC().Unix()
 
 	filter := bson.D{{
 		Key:   "ticker",
-		Value: fundOverview.Ticker,
+		Value: m.Ticker,
 	}}
 
 	update := bson.D{{
 		Key:   "$set",
-		Value: fundOverview,
+		Value: m,
 	}}
 
 	opts := options.Update().SetUpsert(true)
@@ -177,12 +177,12 @@ func (r *FundMongo) InsertOverview(ctx context.Context, o *entities.Overview) er
 }
 
 // InsertHolding inserts fund holding
-func (r *FundMongo) InsertHolding(ctx context.Context, h *entities.Holding) error {
+func (r *FundMongo) InsertHolding(ctx context.Context, e *entities.VanguardFundHolding) error {
 	// create new context for the query
 	ctx, cancel := createContext(ctx, r.conf.TimeoutMS)
 	defer cancel()
 
-	fundHolding, err := models.NewHoldingModel(ctx, r.log, h)
+	m, err := models.NewHoldingModel(ctx, r.log, e)
 	if err != nil {
 		return err
 	}
@@ -194,19 +194,19 @@ func (r *FundMongo) InsertHolding(ctx context.Context, h *entities.Holding) erro
 	}
 	col := r.db.Collection(colname)
 
-	fundHolding.IsActive = true
-	fundHolding.Schema = r.conf.SchemaVersion
-	fundHolding.CreatedAt = time.Now().UTC().Unix()
-	fundHolding.ModifiedAt = time.Now().UTC().Unix()
+	m.IsActive = true
+	m.Schema = r.conf.SchemaVersion
+	m.CreatedAt = time.Now().UTC().Unix()
+	m.ModifiedAt = time.Now().UTC().Unix()
 
 	filter := bson.D{{
 		Key:   "ticker",
-		Value: fundHolding.Ticker,
+		Value: m.Ticker,
 	}}
 
 	update := bson.D{{
 		Key:   "$set",
-		Value: fundHolding,
+		Value: m,
 	}}
 
 	opts := options.Update().SetUpsert(true)

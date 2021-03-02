@@ -3,18 +3,18 @@ package fund
 import (
 	"context"
 
+	logger "github.com/hthl85/aws-lambda-logger"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/entities"
-	"github.com/hthl85/aws-vanguard-ca-etf-scraper/usecase/logger"
 )
 
 // Service sector
 type Service struct {
-	repo IFundRepo
-	log  logger.IAppLogger
+	repo Repo
+	log  logger.ContextLog
 }
 
-// NewFundService create new service
-func NewFundService(r IFundRepo, l logger.IAppLogger) *Service {
+// NewService create new service
+func NewService(r Repo, l logger.ContextLog) *Service {
 	return &Service{
 		repo: r,
 		log:  l,
@@ -22,7 +22,7 @@ func NewFundService(r IFundRepo, l logger.IAppLogger) *Service {
 }
 
 // CreateFund creates new fund
-func (s *Service) CreateFund(ctx context.Context, fund *entities.Fund) error {
+func (s *Service) CreateFund(ctx context.Context, e *entities.VanguardFund) error {
 	s.log.Info(ctx, "create new fund")
-	return s.repo.InsertFund(ctx, fund)
+	return s.repo.InsertFund(ctx, e)
 }

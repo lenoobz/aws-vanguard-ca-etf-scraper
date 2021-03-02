@@ -8,13 +8,13 @@ import (
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/extensions"
 	"github.com/google/uuid"
+	corid "github.com/hthl85/aws-lambda-corid"
+	logger "github.com/hthl85/aws-lambda-logger"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/config"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/entities"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/usecase/fund"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/usecase/holding"
-	"github.com/hthl85/aws-vanguard-ca-etf-scraper/usecase/logger"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/usecase/overview"
-	"github.com/hthl85/aws-vanguard-ca-etf-scraper/utils/corid"
 )
 
 // FundScraper struct
@@ -22,29 +22,30 @@ type FundScraper struct {
 	FundJob         *colly.Collector
 	HoldingJob      *colly.Collector
 	OverviewJob     *colly.Collector
-	log             logger.IAppLogger
-	fundService     fund.IFundService
-	holdingService  holding.IHoldingService
-	overviewService overview.IOverviewService
+	fundService     *fund.Service
+	holdingService  *holding.Service
+	overviewService *overview.Service
+	log             logger.ContextLog
 }
 
 // NewFundScraper create new fund scraper
-func NewFundScraper(fundSvc fund.IFundService, holdingSvc holding.IHoldingService, overviewSvc overview.IOverviewService, l logger.IAppLogger) *FundScraper {
-	fundJob := newScraperJob()
-	holdingJob := newScraperJob()
-	overviewJob := newScraperJob()
+func NewFundScraper(fs *fund.Service, hs *holding.Service, os *overview.Service, l logger.ContextLog) *FundScraper {
+	fj := newScraperJob()
+	hj := newScraperJob()
+	oj := newScraperJob()
 
 	return &FundScraper{
-		FundJob:         fundJob,
-		HoldingJob:      holdingJob,
-		OverviewJob:     overviewJob,
-		fundService:     fundSvc,
-		holdingService:  holdingSvc,
-		overviewService: overviewSvc,
+		FundJob:         fj,
+		HoldingJob:      hj,
+		OverviewJob:     oj,
+		fundService:     fs,
+		holdingService:  hs,
+		overviewService: os,
 		log:             l,
 	}
 }
 
+// newScraperJob creates a new colly collector with some custom configs
 func newScraperJob() *colly.Collector {
 	c := colly.NewCollector(
 		colly.AllowedDomains(config.AllowDomain),
@@ -68,6 +69,7 @@ func newScraperJob() *colly.Collector {
 	return c
 }
 
+// configJobs configs on error handler and on response handler for scaper jobs
 func (s *FundScraper) configJobs() {
 	s.FundJob.OnError(s.errorHandler)
 	s.FundJob.OnResponse(s.processFundListResponse)
@@ -98,6 +100,7 @@ func (s *FundScraper) StartJobs() {
 // Fund List Scraper
 ///////////////////////////////////////////////////////////
 
+// errorHandler generic error handler for all scaper jobs
 func (s *FundScraper) errorHandler(r *colly.Response, err error) {
 	ctx := context.Background()
 	s.log.Error(ctx, "failed to request url", "url", r.Request.URL, "error", err)
@@ -108,16 +111,21 @@ func (s *FundScraper) processFundListResponse(r *colly.Response) {
 	id, _ := uuid.NewRandom()
 	ctx := corid.NewContext(context.Background(), id)
 
-	funds := &entities.VanguardFunds{}
-	if err := json.Unmarshal(r.Body, funds); err != nil {
-		s.log.Warn(ctx, "failed to parse fund list response", "err", err)
+	// define anonymous struct to map fund data from fund list reponse
+	d := struct {
+		Funds map[string]entities.VanguardFund `json:"fundData,omitempty"`
+	}{}
+
+	// unmarshal response data to above struct
+	if err := json.Unmarshal(r.Body, &d); err != nil {
+		s.log.Warn(ctx, "unmarshal fund list response failed", "err", err)
 		return
 	}
 
-	for key, fund := range funds.IndividualFunds {
+	for key, fund := range d.Funds {
 		if fund.Ticker != "" {
 			if err := s.fundService.CreateFund(ctx, &fund); err != nil {
-				s.log.Warn(ctx, "failed to create fund", "portId", key)
+				s.log.Warn(ctx, "create fund failed", "portId", key)
 				continue
 			}
 
@@ -144,7 +152,7 @@ func (s *FundScraper) processFundOverviewResponse(r *colly.Response) {
 	id, _ := uuid.NewRandom()
 	ctx := corid.NewContext(context.Background(), id)
 
-	overview := &entities.Overview{}
+	overview := &entities.VanguardFundOverview{}
 	if err := json.Unmarshal(r.Body, overview); err != nil {
 		s.log.Warn(ctx, "failed to parse fund overview response", "err", err)
 		return
@@ -168,22 +176,22 @@ func (s *FundScraper) processFundHoldingResponse(r *colly.Response) {
 	ticker := r.Request.Ctx.Get("ticker")
 	assetCode := r.Request.Ctx.Get("assetCode")
 
-	holding := &entities.Holding{
+	holding := &entities.VanguardFundHolding{
 		PortID:    portID,
 		Ticker:    ticker,
 		AssetCode: assetCode,
 	}
 
 	if assetCode == "BOND" {
-		if err := json.Unmarshal(r.Body, &holding.BondHolding); err != nil {
+		if err := json.Unmarshal(r.Body, &holding.Bonds); err != nil {
 			s.log.Warn(ctx, "failed to parse bond holding response", "err", err)
 		}
 	} else if assetCode == "EQUITY" {
-		if err := json.Unmarshal(r.Body, &holding.EquityHolding); err != nil {
+		if err := json.Unmarshal(r.Body, &holding.Equities); err != nil {
 			s.log.Warn(ctx, "failed to parse equity holding response", "err", err)
 		}
 	} else if assetCode == "BALANCED" {
-		if err := json.Unmarshal(r.Body, &holding.BalancedHolding); err != nil {
+		if err := json.Unmarshal(r.Body, &holding.Balances); err != nil {
 			s.log.Warn(ctx, "failed to parse balanced holding response", "err", err)
 		}
 	} else {
