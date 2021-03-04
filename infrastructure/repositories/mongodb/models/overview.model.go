@@ -30,8 +30,8 @@ type VanguardOverviewModel struct {
 	Price            float64                  `bson:"price,omitempty"`
 	ManagementFee    float64                  `bson:"managementFee,omitempty"`
 	MerFee           float64                  `bson:"merFee,omitempty"`
-	Sectors          []*SectorBreakdownModel  `bson:"sectorBreakdown,omitempty"`
-	Countries        []*CountryBreakdownModel `bson:"countryBreakdown,omitempty"`
+	Sectors          []*SectorBreakdownModel  `bson:"sectors,omitempty"`
+	Countries        []*CountryBreakdownModel `bson:"countries,omitempty"`
 }
 
 // SectorBreakdownModel is the representation of sector the fund invested
