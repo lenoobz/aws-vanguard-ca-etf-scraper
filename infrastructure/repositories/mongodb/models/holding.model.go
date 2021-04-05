@@ -41,23 +41,23 @@ type SectorWeightStockModel struct {
 }
 
 // NewHoldingModel create a fund holding model
-func NewHoldingModel(ctx context.Context, log logger.ContextLog, e *entities.VanguardFundHolding) (*VanguardFundHoldingModel, error) {
+func NewHoldingModel(ctx context.Context, l logger.ContextLog, e *entities.VanguardFundHolding) (*VanguardFundHoldingModel, error) {
 	if e.AssetCode == "BOND" {
-		return newBondHolding(ctx, log, e)
+		return newBondHolding(ctx, l, e)
 	}
 
 	if e.AssetCode == "EQUITY" {
-		return newEquityHolding(ctx, log, e)
+		return newEquityHolding(ctx, l, e)
 	}
 
 	if e.AssetCode == "BALANCED" {
-		return newBalanceHolding(ctx, log, e)
+		return newBalanceHolding(ctx, l, e)
 	}
 
 	return nil, nil
 }
 
-func newBondHolding(ctx context.Context, log logger.ContextLog, e *entities.VanguardFundHolding) (*VanguardFundHoldingModel, error) {
+func newBondHolding(ctx context.Context, l logger.ContextLog, e *entities.VanguardFundHolding) (*VanguardFundHoldingModel, error) {
 	var m = &VanguardFundHoldingModel{}
 
 	if e.PortID != "" {
@@ -75,7 +75,7 @@ func newBondHolding(ctx context.Context, log logger.ContextLog, e *entities.Vang
 		holding := e.Bonds[0]
 
 		for _, v := range holding.SectorWeightBond {
-			bond, err := newSectorWeightBondModel(ctx, log, v)
+			bond, err := newSectorWeightBondModel(ctx, l, v)
 			if err != nil {
 				continue
 			}
@@ -89,7 +89,7 @@ func newBondHolding(ctx context.Context, log logger.ContextLog, e *entities.Vang
 	return m, nil
 }
 
-func newEquityHolding(ctx context.Context, log logger.ContextLog, e *entities.VanguardFundHolding) (*VanguardFundHoldingModel, error) {
+func newEquityHolding(ctx context.Context, l logger.ContextLog, e *entities.VanguardFundHolding) (*VanguardFundHoldingModel, error) {
 	var m = &VanguardFundHoldingModel{}
 
 	if e.PortID != "" {
@@ -107,7 +107,7 @@ func newEquityHolding(ctx context.Context, log logger.ContextLog, e *entities.Va
 		holding := e.Equities[0]
 
 		for _, v := range holding.SectorWeightStock {
-			stock, err := newSectorWeightStockModel(ctx, log, v)
+			stock, err := newSectorWeightStockModel(ctx, l, v)
 			if err != nil {
 				continue
 			}
@@ -121,7 +121,7 @@ func newEquityHolding(ctx context.Context, log logger.ContextLog, e *entities.Va
 	return m, nil
 }
 
-func newBalanceHolding(ctx context.Context, log logger.ContextLog, e *entities.VanguardFundHolding) (*VanguardFundHoldingModel, error) {
+func newBalanceHolding(ctx context.Context, l logger.ContextLog, e *entities.VanguardFundHolding) (*VanguardFundHoldingModel, error) {
 	var m = &VanguardFundHoldingModel{}
 
 	if e.PortID != "" {
@@ -140,7 +140,7 @@ func newBalanceHolding(ctx context.Context, log logger.ContextLog, e *entities.V
 		holding := e.Balances[0]
 
 		for _, v := range holding.SectorWeightStock {
-			stock, err := newSectorWeightStockModel(ctx, log, v)
+			stock, err := newSectorWeightStockModel(ctx, l, v)
 			if err != nil {
 				continue
 			}
@@ -149,7 +149,7 @@ func newBalanceHolding(ctx context.Context, log logger.ContextLog, e *entities.V
 		}
 
 		for _, v := range holding.SectorWeightBond {
-			bond, err := newSectorWeightBondModel(ctx, log, v)
+			bond, err := newSectorWeightBondModel(ctx, l, v)
 			if err != nil {
 				continue
 			}
@@ -164,13 +164,13 @@ func newBalanceHolding(ctx context.Context, log logger.ContextLog, e *entities.V
 	return m, nil
 }
 
-func newSectorWeightBondModel(ctx context.Context, log logger.ContextLog, e *entities.SectorWeightBond) (*SectorWeightBondModel, error) {
+func newSectorWeightBondModel(ctx context.Context, l logger.ContextLog, e *entities.SectorWeightBond) (*SectorWeightBondModel, error) {
 	var m = &SectorWeightBondModel{}
 
 	if e.MarketValPercent != "" {
 		v, err := e.MarketValPercent.Float64()
 		if err != nil {
-			log.Warn(ctx, "parse SectorWeightBond.MarketValPercent failed", "err", err, "MarketValPercent", e.MarketValPercent)
+			l.Warn(ctx, "parse SectorWeightBond.MarketValPercent failed", "error", err, "MarketValPercent", e.MarketValPercent)
 			v = 0
 		}
 
@@ -180,7 +180,7 @@ func newSectorWeightBondModel(ctx context.Context, log logger.ContextLog, e *ent
 	if e.MarketValue != "" {
 		v, err := e.MarketValue.Float64()
 		if err != nil {
-			log.Warn(ctx, "parse SectorWeightBond.MarketValue failed", "err", err, "MarketValue", e.MarketValue)
+			l.Warn(ctx, "parse SectorWeightBond.MarketValue failed", "error", err, "MarketValue", e.MarketValue)
 			v = 0
 		}
 
@@ -198,7 +198,7 @@ func newSectorWeightBondModel(ctx context.Context, log logger.ContextLog, e *ent
 	return m, nil
 }
 
-func newSectorWeightStockModel(ctx context.Context, log logger.ContextLog, e *entities.SectorWeightStock) (*SectorWeightStockModel, error) {
+func newSectorWeightStockModel(ctx context.Context, l logger.ContextLog, e *entities.SectorWeightStock) (*SectorWeightStockModel, error) {
 	var m = &SectorWeightStockModel{}
 
 	if e.Symbol != "" {
@@ -208,7 +208,7 @@ func newSectorWeightStockModel(ctx context.Context, log logger.ContextLog, e *en
 	if e.MarketValPercent != "" {
 		v, err := e.MarketValPercent.Float64()
 		if err != nil {
-			log.Warn(ctx, "parse SectorWeightStock.MarketValPercent failed", "err", err, "MarketValPercent", e.MarketValPercent)
+			l.Warn(ctx, "parse SectorWeightStock.MarketValPercent failed", "error", err, "MarketValPercent", e.MarketValPercent)
 			v = 0
 		}
 
@@ -218,7 +218,7 @@ func newSectorWeightStockModel(ctx context.Context, log logger.ContextLog, e *en
 	if e.MarketValue != "" {
 		v, err := e.MarketValPercent.Float64()
 		if err != nil {
-			log.Warn(ctx, "parse SectorWeightStock.MarketValue failed", "err", err, "MarketValue", e.MarketValue)
+			l.Warn(ctx, "parse SectorWeightStock.MarketValue failed", "error", err, "MarketValue", e.MarketValue)
 			v = 0
 		}
 

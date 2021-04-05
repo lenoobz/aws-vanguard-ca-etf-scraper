@@ -98,13 +98,15 @@ func (r *FundMongo) InsertFund(ctx context.Context, e *entities.VanguardFund) er
 
 	m, err := models.NewVanguardFundModel(e)
 	if err != nil {
+		r.log.Error(ctx, "create model failed", "error", err)
 		return err
 	}
 
 	// what collection we are going to use
-	colname, ok := r.conf.Colnames["fund"]
+	colname, ok := r.conf.Colnames[config.VANGUARD_FUNDS_COL]
 	if !ok {
 		r.log.Error(ctx, "cannot find collection name")
+		return fmt.Errorf("cannot find collection name")
 	}
 	col := r.db.Collection(colname)
 
@@ -127,6 +129,7 @@ func (r *FundMongo) InsertFund(ctx context.Context, e *entities.VanguardFund) er
 
 	_, err = col.UpdateOne(ctx, filter, update, opts)
 	if err != nil {
+		r.log.Error(ctx, "update one failed", "error", err)
 		return err
 	}
 
@@ -141,11 +144,12 @@ func (r *FundMongo) InsertOverview(ctx context.Context, e *entities.VanguardFund
 
 	m, err := models.NewOverviewModel(ctx, r.log, e)
 	if err != nil {
+		r.log.Error(ctx, "create model failed", "error", err)
 		return err
 	}
 
 	// what collection we are going to use
-	colname, ok := r.conf.Colnames["overview"]
+	colname, ok := r.conf.Colnames[config.VANGUARD_OVERVIEW_COL]
 	if !ok {
 		r.log.Error(ctx, "cannot find collection name")
 	}
@@ -170,6 +174,7 @@ func (r *FundMongo) InsertOverview(ctx context.Context, e *entities.VanguardFund
 
 	_, err = col.UpdateOne(ctx, filter, update, opts)
 	if err != nil {
+		r.log.Error(ctx, "update one failed", "error", err)
 		return err
 	}
 
@@ -184,11 +189,12 @@ func (r *FundMongo) InsertHolding(ctx context.Context, e *entities.VanguardFundH
 
 	m, err := models.NewHoldingModel(ctx, r.log, e)
 	if err != nil {
+		r.log.Error(ctx, "create model failed", "error", err)
 		return err
 	}
 
 	// what collection we are going to use
-	colname, ok := r.conf.Colnames["holding"]
+	colname, ok := r.conf.Colnames[config.VANGUARD_HOLDING_COL]
 	if !ok {
 		r.log.Error(ctx, "cannot find collection name")
 	}
@@ -213,6 +219,7 @@ func (r *FundMongo) InsertHolding(ctx context.Context, e *entities.VanguardFundH
 
 	_, err = col.UpdateOne(ctx, filter, update, opts)
 	if err != nil {
+		r.log.Error(ctx, "update one failed", "error", err)
 		return err
 	}
 

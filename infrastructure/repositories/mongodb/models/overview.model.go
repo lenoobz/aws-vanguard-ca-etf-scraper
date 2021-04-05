@@ -49,7 +49,7 @@ type CountryBreakdownModel struct {
 }
 
 // NewOverviewModel create a fund overview model
-func NewOverviewModel(ctx context.Context, log logger.ContextLog, e *entities.VanguardFundOverview) (*VanguardOverviewModel, error) {
+func NewOverviewModel(ctx context.Context, l logger.ContextLog, e *entities.VanguardFundOverview) (*VanguardOverviewModel, error) {
 	var m = &VanguardOverviewModel{}
 
 	if e.PortID != "" {
@@ -94,7 +94,7 @@ func NewOverviewModel(ctx context.Context, log logger.ContextLog, e *entities.Va
 		ta, err := strconv.ParseFloat(e.TotalAssets, 64)
 
 		if err != nil {
-			log.Warn(ctx, "parse Overview.TotalAssets failed", "err", err, "TotalAssets", e.TotalAssets)
+			l.Warn(ctx, "parse Overview.TotalAssets failed", "error", err, "TotalAssets", e.TotalAssets)
 			ta = 0
 		}
 
@@ -105,7 +105,7 @@ func NewOverviewModel(ctx context.Context, log logger.ContextLog, e *entities.Va
 		ym, err := strconv.ParseFloat(e.Yield12Month, 64)
 
 		if err != nil {
-			log.Warn(ctx, "parse Overview.Yield12Month failed", "err", err, "Yield12Month", e.Yield12Month)
+			l.Warn(ctx, "parse Overview.Yield12Month failed", "error", err, "Yield12Month", e.Yield12Month)
 			ym = 0
 		}
 
@@ -118,7 +118,7 @@ func NewOverviewModel(ctx context.Context, log logger.ContextLog, e *entities.Va
 		v, err := strconv.ParseFloat(e.ManagementFee, 64)
 
 		if err != nil {
-			log.Warn(ctx, "parse Overview.ManagementFee failed", "err", err, "ManagementFee", e.ManagementFee)
+			l.Warn(ctx, "parse Overview.ManagementFee failed", "error", err, "ManagementFee", e.ManagementFee)
 			v = 0
 		}
 
@@ -129,7 +129,7 @@ func NewOverviewModel(ctx context.Context, log logger.ContextLog, e *entities.Va
 		v, err := strconv.ParseFloat(e.MerFee, 64)
 
 		if err != nil {
-			log.Warn(ctx, "parse Overview.MerValue failed", "err", err, "MerValue", e.MerFee)
+			l.Warn(ctx, "parse Overview.MerValue failed", "error", err, "MerValue", e.MerFee)
 			v = 0
 		}
 
@@ -138,7 +138,7 @@ func NewOverviewModel(ctx context.Context, log logger.ContextLog, e *entities.Va
 
 	var sectors []*SectorBreakdownModel
 	for _, s := range e.Sectors {
-		sector, err := newSectorBreakdownModel(ctx, log, s)
+		sector, err := newSectorBreakdownModel(ctx, l, s)
 
 		if err != nil {
 			return nil, err
@@ -150,7 +150,7 @@ func NewOverviewModel(ctx context.Context, log logger.ContextLog, e *entities.Va
 
 	var countries []*CountryBreakdownModel
 	for _, c := range e.Countries {
-		country, err := newCountryBreakdownModel(ctx, log, c)
+		country, err := newCountryBreakdownModel(ctx, l, c)
 
 		if err != nil {
 			return nil, err
@@ -165,7 +165,7 @@ func NewOverviewModel(ctx context.Context, log logger.ContextLog, e *entities.Va
 	return m, nil
 }
 
-func newSectorBreakdownModel(ctx context.Context, log logger.ContextLog, e *entities.SectorBreakdown) (*SectorBreakdownModel, error) {
+func newSectorBreakdownModel(ctx context.Context, l logger.ContextLog, e *entities.SectorBreakdown) (*SectorBreakdownModel, error) {
 	var m = &SectorBreakdownModel{}
 
 	if e.SectorName != "" {
@@ -176,7 +176,7 @@ func newSectorBreakdownModel(ctx context.Context, log logger.ContextLog, e *enti
 		v, err := strconv.ParseFloat(e.FundPercent, 64)
 
 		if err != nil {
-			log.Warn(ctx, "parse SectorWeighting.FundPercent failed", "err", err, "FundPercent", e.FundPercent)
+			l.Warn(ctx, "parse SectorWeighting.FundPercent failed", "error", err, "FundPercent", e.FundPercent)
 			v = 0
 		}
 
@@ -186,7 +186,7 @@ func newSectorBreakdownModel(ctx context.Context, log logger.ContextLog, e *enti
 	return m, nil
 }
 
-func newCountryBreakdownModel(ctx context.Context, log logger.ContextLog, e *entities.CountryBreakdown) (*CountryBreakdownModel, error) {
+func newCountryBreakdownModel(ctx context.Context, l logger.ContextLog, e *entities.CountryBreakdown) (*CountryBreakdownModel, error) {
 	var m = &CountryBreakdownModel{}
 
 	if e.CountryName != "" {
@@ -201,7 +201,7 @@ func newCountryBreakdownModel(ctx context.Context, log logger.ContextLog, e *ent
 		v, err := strconv.ParseFloat(e.FundMktPercent, 64)
 
 		if err != nil {
-			log.Warn(ctx, "parse CountryExposure.FundMktPercent failed", "err", err, "FundMktPercent", e.FundMktPercent)
+			l.Warn(ctx, "parse CountryExposure.FundMktPercent failed", "error", err, "FundMktPercent", e.FundMktPercent)
 			v = 0
 		}
 
@@ -216,7 +216,7 @@ func newCountryBreakdownModel(ctx context.Context, log logger.ContextLog, e *ent
 		v, err := strconv.ParseFloat(e.FundTnaPercent, 64)
 
 		if err != nil {
-			log.Warn(ctx, "parse CountryExposure.FundTnaPercent failed", "err", err, "FundTnaPercent", e.FundTnaPercent)
+			l.Warn(ctx, "parse CountryExposure.FundTnaPercent failed", "error", err, "FundTnaPercent", e.FundTnaPercent)
 			v = 0
 		}
 

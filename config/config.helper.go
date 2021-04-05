@@ -23,13 +23,10 @@ func GetFundHoldingURL(portID, issueType, assetCode string) string {
 	switch assetCode {
 	case "BOND":
 		URL = fmt.Sprintf("https://api.vanguard.com/rs/gre/gra/1.7.0/datasets/caw-indv-holding-details-bond.json?vars=portId:%s,issueType:%s", portID, issueType)
-		break
 	case "EQUITY":
 		URL = fmt.Sprintf("https://api.vanguard.com/rs/gre/gra/1.7.0/datasets/caw-indv-holding-details-equity.json?vars=portId:%s,issueType:%s", portID, issueType)
-		break
 	case "BALANCED":
 		URL = fmt.Sprintf("https://api.vanguard.com/rs/gre/gra/1.7.0/datasets/caw-indv-holding-details-balanced.json?vars=portId:%s,issueType:%s", portID, issueType)
-		break
 	default:
 		break
 	}
