@@ -75,7 +75,7 @@ func NewFundMongo(db *mongo.Database, l logger.ContextLog, conf *config.MongoCon
 // Close disconnect from database
 func (r *FundMongo) Close() {
 	ctx := context.Background()
-	r.log.Info(ctx, "close fund mongo client")
+	r.log.Info(ctx, "close mongo client")
 
 	if r.client == nil {
 		return
