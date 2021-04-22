@@ -7,6 +7,7 @@ import (
 
 	logger "github.com/hthl85/aws-lambda-logger"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/config"
+	"github.com/hthl85/aws-vanguard-ca-etf-scraper/consts"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/entities"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/infrastructure/repositories/mongodb/models"
 	"go.mongodb.org/mongo-driver/bson"
@@ -82,7 +83,7 @@ func (r *FundMongo) Close() {
 	}
 
 	if err := r.client.Disconnect(ctx); err != nil {
-		r.log.Error(ctx, "disconnect mongo failed", err)
+		r.log.Error(ctx, "disconnect mongo failed", "error", err)
 	}
 }
 
@@ -103,7 +104,7 @@ func (r *FundMongo) InsertFund(ctx context.Context, e *entities.VanguardFund) er
 	}
 
 	// what collection we are going to use
-	colname, ok := r.conf.Colnames[config.VANGUARD_FUNDS_COL]
+	colname, ok := r.conf.Colnames[consts.VANGUARD_FUNDS_COL]
 	if !ok {
 		r.log.Error(ctx, "cannot find collection name")
 		return fmt.Errorf("cannot find collection name")
@@ -112,7 +113,6 @@ func (r *FundMongo) InsertFund(ctx context.Context, e *entities.VanguardFund) er
 
 	m.IsActive = true
 	m.Schema = r.conf.SchemaVersion
-	m.CreatedAt = time.Now().UTC().Unix()
 	m.ModifiedAt = time.Now().UTC().Unix()
 
 	filter := bson.D{{
@@ -120,10 +120,19 @@ func (r *FundMongo) InsertFund(ctx context.Context, e *entities.VanguardFund) er
 		Value: m.Ticker,
 	}}
 
-	update := bson.D{{
-		Key:   "$set",
-		Value: m,
-	}}
+	update := bson.D{
+		{
+			Key:   "$set",
+			Value: m,
+		},
+		{
+			Key: "$setOnInsert",
+			Value: bson.D{{
+				Key:   "createdAt",
+				Value: time.Now().UTC().Unix(),
+			}},
+		},
+	}
 
 	opts := options.Update().SetUpsert(true)
 
@@ -149,7 +158,7 @@ func (r *FundMongo) InsertOverview(ctx context.Context, e *entities.VanguardFund
 	}
 
 	// what collection we are going to use
-	colname, ok := r.conf.Colnames[config.VANGUARD_OVERVIEW_COL]
+	colname, ok := r.conf.Colnames[consts.VANGUARD_OVERVIEW_COL]
 	if !ok {
 		r.log.Error(ctx, "cannot find collection name")
 	}
@@ -157,7 +166,6 @@ func (r *FundMongo) InsertOverview(ctx context.Context, e *entities.VanguardFund
 
 	m.IsActive = true
 	m.Schema = r.conf.SchemaVersion
-	m.CreatedAt = time.Now().UTC().Unix()
 	m.ModifiedAt = time.Now().UTC().Unix()
 
 	filter := bson.D{{
@@ -165,10 +173,19 @@ func (r *FundMongo) InsertOverview(ctx context.Context, e *entities.VanguardFund
 		Value: m.Ticker,
 	}}
 
-	update := bson.D{{
-		Key:   "$set",
-		Value: m,
-	}}
+	update := bson.D{
+		{
+			Key:   "$set",
+			Value: m,
+		},
+		{
+			Key: "$setOnInsert",
+			Value: bson.D{{
+				Key:   "createdAt",
+				Value: time.Now().UTC().Unix(),
+			}},
+		},
+	}
 
 	opts := options.Update().SetUpsert(true)
 
@@ -194,7 +211,7 @@ func (r *FundMongo) InsertHolding(ctx context.Context, e *entities.VanguardFundH
 	}
 
 	// what collection we are going to use
-	colname, ok := r.conf.Colnames[config.VANGUARD_HOLDING_COL]
+	colname, ok := r.conf.Colnames[consts.VANGUARD_HOLDING_COL]
 	if !ok {
 		r.log.Error(ctx, "cannot find collection name")
 	}
@@ -202,7 +219,6 @@ func (r *FundMongo) InsertHolding(ctx context.Context, e *entities.VanguardFundH
 
 	m.IsActive = true
 	m.Schema = r.conf.SchemaVersion
-	m.CreatedAt = time.Now().UTC().Unix()
 	m.ModifiedAt = time.Now().UTC().Unix()
 
 	filter := bson.D{{
@@ -210,10 +226,19 @@ func (r *FundMongo) InsertHolding(ctx context.Context, e *entities.VanguardFundH
 		Value: m.Ticker,
 	}}
 
-	update := bson.D{{
-		Key:   "$set",
-		Value: m,
-	}}
+	update := bson.D{
+		{
+			Key:   "$set",
+			Value: m,
+		},
+		{
+			Key: "$setOnInsert",
+			Value: bson.D{{
+				Key:   "createdAt",
+				Value: time.Now().UTC().Unix(),
+			}},
+		},
+	}
 
 	opts := options.Update().SetUpsert(true)
 

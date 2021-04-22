@@ -1,6 +1,6 @@
 package entities
 
-// VanguardFundOverview represents Vanguard fund overview entity
+// VanguardFundOverview struct
 type VanguardFundOverview struct {
 	PortID           string              `json:"portId,omitempty"`
 	AssetClass       string              `json:"assetClass,omitempty"`
@@ -16,25 +16,33 @@ type VanguardFundOverview struct {
 	FundCode         *FundCode           `json:"fundCodesData,omitempty"`
 	Sectors          []*SectorBreakdown  `json:"sectorWeighting,omitempty"`
 	Countries        []*CountryBreakdown `json:"countryExposure,omitempty"`
+	DistHistory      []*DividendHistory  `json:"distHistory,omitempty"`
 }
 
-// FundCode represents fund meta data such as ticker name, sedol code, isin number
+// FundCode struct
 type FundCode struct {
 	Isin           string `json:"isin,omitempty"`
 	Sedol          string `json:"sedol,omitempty"`
 	ExchangeTicker string `json:"exchangeTicker,omitempty"`
 }
 
-// SectorBreakdown represents fund sector breakdown
+// SectorBreakdown struct
 type SectorBreakdown struct {
 	FundPercent string `json:"fundPercent,omitempty"`
 	SectorName  string `json:"longName,omitempty"`
 }
 
-// CountryBreakdown represents fund country breakdown
+// CountryBreakdown struct
 type CountryBreakdown struct {
 	CountryName     string `json:"countryName,omitempty"`
 	FundMktPercent  string `json:"fundMktPercent,omitempty"`
 	FundTnaPercent  string `json:"fundTnaPercent,omitempty"`
 	HoldingStatCode string `json:"holdingStatCode,omitempty"`
+}
+
+// DividendHistory struct
+type DividendHistory struct {
+	AsOfDate     string `json:"asOfDate,omitempty"`
+	Amount       string `json:"amount,omitempty"`
+	CurrencyCode string `json:"currencyCode,omitempty"`
 }

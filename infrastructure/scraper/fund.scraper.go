@@ -118,21 +118,23 @@ func (s *FundScraper) processFundListResponse(r *colly.Response) {
 
 	// unmarshal response data to above struct
 	if err := json.Unmarshal(r.Body, &d); err != nil {
-		s.log.Warn(ctx, "unmarshal fund list response failed", "error", err)
+		s.log.Error(ctx, "unmarshal fund list response failed", "error", err)
 		return
 	}
 
 	for key, fund := range d.Funds {
 		if fund.Ticker != "" {
 			if err := s.fundService.CreateFund(ctx, &fund); err != nil {
-				s.log.Warn(ctx, "create fund failed", "portId", key, "error", err)
+				s.log.Error(ctx, "create fund failed", "portId", key, "error", err)
 				continue
 			}
 
+			// scrape overview data
 			overviewURL := config.GetFundOverviewURL(key)
 			overviewCTX := colly.NewContext()
 			s.OverviewJob.Request("GET", overviewURL, nil, overviewCTX, nil)
 
+			// scrape holding data
 			holdingURL := config.GetFundHoldingURL(key, "F", fund.AssetCode)
 			holdingCTX := colly.NewContext()
 			holdingCTX.Put("portId", key)
@@ -154,12 +156,12 @@ func (s *FundScraper) processFundOverviewResponse(r *colly.Response) {
 
 	overview := &entities.VanguardFundOverview{}
 	if err := json.Unmarshal(r.Body, overview); err != nil {
-		s.log.Warn(ctx, "failed to parse fund overview response", "error", err)
+		s.log.Error(ctx, "failed to parse fund overview response", "error", err)
 		return
 	}
 
 	if err := s.overviewService.CreateOverview(ctx, overview); err != nil {
-		s.log.Warn(ctx, "failed to create overview", "portId", overview.PortID, "error", err)
+		s.log.Error(ctx, "failed to create overview", "portId", overview.PortID, "error", err)
 	}
 }
 
@@ -184,15 +186,15 @@ func (s *FundScraper) processFundHoldingResponse(r *colly.Response) {
 
 	if assetCode == "BOND" {
 		if err := json.Unmarshal(r.Body, &holding.Bonds); err != nil {
-			s.log.Warn(ctx, "failed to parse bond holding response", "error", err)
+			s.log.Error(ctx, "failed to parse bond holding response", "error", err)
 		}
 	} else if assetCode == "EQUITY" {
 		if err := json.Unmarshal(r.Body, &holding.Equities); err != nil {
-			s.log.Warn(ctx, "failed to parse equity holding response", "error", err)
+			s.log.Error(ctx, "failed to parse equity holding response", "error", err)
 		}
 	} else if assetCode == "BALANCED" {
 		if err := json.Unmarshal(r.Body, &holding.Balances); err != nil {
-			s.log.Warn(ctx, "failed to parse balanced holding response", "error", err)
+			s.log.Error(ctx, "failed to parse balanced holding response", "error", err)
 		}
 	} else {
 		s.log.Error(ctx, "unsupport asset type", "assetCode", assetCode)
@@ -200,6 +202,6 @@ func (s *FundScraper) processFundHoldingResponse(r *colly.Response) {
 	}
 
 	if err := s.holdingService.CreateHolding(ctx, holding); err != nil {
-		s.log.Warn(ctx, "failed to create holding", "portId", portID, "error", err)
+		s.log.Error(ctx, "failed to create holding", "portId", portID, "error", err)
 	}
 }

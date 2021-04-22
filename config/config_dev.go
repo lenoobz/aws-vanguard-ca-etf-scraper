@@ -21,10 +21,3 @@ var AppConf = AppConfig{
 		},
 	},
 }
-
-// Collection names
-const (
-	VANGUARD_FUNDS_COL    = "fund"
-	VANGUARD_HOLDING_COL  = "holding"
-	VANGUARD_OVERVIEW_COL = "overview"
-)

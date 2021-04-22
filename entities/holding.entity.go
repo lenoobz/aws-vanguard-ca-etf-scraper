@@ -39,17 +39,6 @@ type SectorWeightBond struct {
 	Rate             float64     `json:"rate,omitempty"`
 	FaceAmount       float64     `json:"faceAmount,omitempty"`
 	Type             string      `json:"type,omitempty"`
-
-	// Bond holding bond
-	// FaceAmount       float64 `json:"faceAmount,omitempty"`
-	// MarketValPercent string  `json:"marketValPercent,omitempty"`
-	// MarketValue      float64 `json:"marketValue,omitempty"`
-	// Rate             float64 `json:"rate,omitempty"`
-
-	// Balance holding bond
-	// MarketValPercent float64 `json:"marketValPercent,omitempty"`
-	// Rate             float64 `json:"rate,omitempty"`
-	// Type             string  `json:"type,omitempty"`
 }
 
 // SectorWeightStock struct
@@ -59,17 +48,4 @@ type SectorWeightStock struct {
 	Shares           float64     `json:"shares,omitempty"`
 	Symbol           string      `json:"symbol,omitempty"`
 	Type             string      `json:"type,omitempty"`
-
-	// Equity holding stock
-	// MarketValPercent string  `json:"marketValPercent,omitempty"`
-	// MarketValue      string  `json:"marketValue,omitempty"`
-	// Shares           float64 `json:"shares,omitempty"`
-	// Symbol           string  `json:"symbol,omitempty"`
-
-	// Balanced holding stock
-	// MarketValPercent float64 `json:"marketValPercent,omitempty"`
-	// MarketValue      float64 `json:"marketValue,omitempty"`
-	// Shares           float64 `json:"shares,omitempty"`
-	// Symbol           string  `json:"symbol,omitempty"`
-	// Type             string  `json:"type,omitempty"`
 }
