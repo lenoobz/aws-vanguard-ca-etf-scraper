@@ -35,6 +35,10 @@ type VanguardOverviewModel struct {
 	Price            float64                  `bson:"price,omitempty"`
 	ManagementFee    float64                  `bson:"managementFee,omitempty"`
 	MerFee           float64                  `bson:"merFee,omitempty"`
+	DistYield        float64                  `bson:"distYield,omitempty"`
+	AllocationStock  float64                  `bson:"allocationStock,omitempty"`
+	AllocationBond   float64                  `bson:"allocationBond,omitempty"`
+	AllocationCash   float64                  `bson:"allocationCash,omitempty"`
 	Sectors          []*SectorBreakdownModel  `bson:"sectors,omitempty"`
 	Countries        []*CountryBreakdownModel `bson:"countries,omitempty"`
 	DividendHistory  []*DividendHistoryModel  `bson:"dividendHistory,omitempty"`
@@ -150,6 +154,21 @@ func NewOverviewModel(ctx context.Context, l logger.ContextLog, e *entities.Vang
 
 		m.MerFee = v
 	}
+
+	if e.DistYield != "" {
+		v, err := strconv.ParseFloat(e.DistYield, 64)
+
+		if err != nil {
+			l.Warn(ctx, "parse Overview.DistYield failed", "error", err, "DistYield", e.DistYield)
+			v = 0
+		}
+
+		m.DistYield = v
+	}
+
+	m.AllocationStock = e.AllocationStock
+	m.AllocationBond = e.AllocationBond
+	m.AllocationCash = e.AllocationCash
 
 	// map sector breakdown model
 	var sectors []*SectorBreakdownModel

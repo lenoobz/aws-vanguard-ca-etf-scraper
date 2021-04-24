@@ -13,6 +13,10 @@ type VanguardFundOverview struct {
 	BaseCurrency     string              `json:"baseCurrency,omitempty"`
 	ManagementFee    string              `json:"managementFee,omitempty"`
 	MerFee           string              `json:"merValue,omitempty"`
+	DistYield        string              `json:"distYield,omitempty"`
+	AllocationStock  float64             `json:"allocationStock,omitempty"`
+	AllocationBond   float64             `json:"allocationBond,omitempty"`
+	AllocationCash   float64             `json:"allocationCash,omitempty"`
 	FundCode         *FundCode           `json:"fundCodesData,omitempty"`
 	Sectors          []*SectorBreakdown  `json:"sectorWeighting,omitempty"`
 	Countries        []*CountryBreakdown `json:"countryExposure,omitempty"`
