@@ -7,7 +7,6 @@ import (
 	logger "github.com/hthl85/aws-lambda-logger"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/consts"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/entities"
-	"github.com/hthl85/aws-vanguard-ca-etf-scraper/utils/ticker"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -68,7 +67,7 @@ func newBondHolding(ctx context.Context, log logger.ContextLog, fundHolding *ent
 	}
 
 	if fundHolding.Ticker != "" {
-		fundHoldingModel.Ticker = ticker.GenYahooTickerFromVanguardTicker(fundHolding.Ticker)
+		fundHoldingModel.Ticker = fundHolding.Ticker
 	}
 
 	fundHoldingModel.AssetCode = fundHolding.AssetCode
