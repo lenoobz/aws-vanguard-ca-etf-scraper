@@ -8,7 +8,7 @@ import (
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/config"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/infrastructure/repositories/mongodb/repos"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/infrastructure/scraper"
-	"github.com/hthl85/aws-vanguard-ca-etf-scraper/usecase/fund"
+	"github.com/hthl85/aws-vanguard-ca-etf-scraper/usecase/funds"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/usecase/holding"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/usecase/overview"
 )
@@ -31,13 +31,13 @@ func main() {
 	defer repo.Close()
 
 	// create new service
-	fs := fund.NewService(repo, zap)
-	hs := holding.NewService(repo, zap)
-	os := overview.NewService(repo, zap)
+	fundService := funds.NewService(repo, zap)
+	fundHoldingService := holding.NewService(repo, zap)
+	fundOverviewService := overview.NewService(repo, zap)
 
 	// create new scraper jobs
-	jobs := scraper.NewFundScraper(fs, hs, os, zap)
-	jobs.StartJobs()
+	jobs := scraper.NewFundScraper(fundService, fundHoldingService, fundOverviewService, zap)
+	jobs.ScrapeAllVanguardFundsDetails()
 
 	lambda.Start(lambdaHandler)
 }

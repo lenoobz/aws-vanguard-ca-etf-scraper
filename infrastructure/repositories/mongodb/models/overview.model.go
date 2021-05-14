@@ -42,7 +42,7 @@ type VanguardOverviewModel struct {
 	AllocationCash   float64                  `bson:"allocationCash,omitempty"`
 	Sectors          []*SectorBreakdownModel  `bson:"sectors,omitempty"`
 	Countries        []*CountryBreakdownModel `bson:"countries,omitempty"`
-	DividendHistory  []*DividendHistoryModel  `bson:"dividendHistory,omitempty"`
+	Dividends        []*DividendHistoryModel  `bson:"dividends,omitempty"`
 }
 
 // SectorBreakdownModel struct
@@ -68,272 +68,272 @@ type DividendHistoryModel struct {
 	AsOfDate     *time.Time `bson:"asOfDate,omitempty"`
 }
 
-// NewOverviewModel create a fund overview model
-func NewOverviewModel(ctx context.Context, l logger.ContextLog, e *entities.VanguardFundOverview) (*VanguardOverviewModel, error) {
-	var m = &VanguardOverviewModel{}
+// NewFundOverviewModel create a fund overview model
+func NewFundOverviewModel(ctx context.Context, log logger.ContextLog, fundOverview *entities.VanguardFundOverview) (*VanguardOverviewModel, error) {
+	var fundOverviewModel = &VanguardOverviewModel{}
 
-	if e.PortID != "" {
-		m.PortID = e.PortID
+	if fundOverview.PortID != "" {
+		fundOverviewModel.PortID = fundOverview.PortID
 	}
 
-	if e.AssetClass != "" {
-		m.AssetClass = e.AssetClass
+	if fundOverview.AssetClass != "" {
+		fundOverviewModel.AssetClass = fundOverview.AssetClass
 	}
 
-	if e.Strategy != "" {
-		m.Strategy = e.Strategy
+	if fundOverview.Strategy != "" {
+		fundOverviewModel.Strategy = fundOverview.Strategy
 	}
 
-	if e.DividendSchedule != "" {
-		m.DividendSchedule = e.DividendSchedule
+	if fundOverview.DividendSchedule != "" {
+		fundOverviewModel.DividendSchedule = fundOverview.DividendSchedule
 	}
 
-	if e.ShortName != "" {
-		m.Name = e.ShortName
+	if fundOverview.ShortName != "" {
+		fundOverviewModel.Name = fundOverview.ShortName
 	}
 
-	if e.BaseCurrency != "" {
-		m.Currency = e.BaseCurrency
+	if fundOverview.BaseCurrency != "" {
+		fundOverviewModel.Currency = fundOverview.BaseCurrency
 	}
 
-	if e.FundCode != nil {
-		if e.FundCode.Isin != "" {
-			m.Isin = e.FundCode.Isin
+	if fundOverview.FundCode != nil {
+		if fundOverview.FundCode.Isin != "" {
+			fundOverviewModel.Isin = fundOverview.FundCode.Isin
 		}
 
-		if e.FundCode.Sedol != "" {
-			m.Sedol = e.FundCode.Sedol
+		if fundOverview.FundCode.Sedol != "" {
+			fundOverviewModel.Sedol = fundOverview.FundCode.Sedol
 		}
 
-		if e.FundCode.ExchangeTicker != "" {
-			m.Ticker = ticker.GetYahooTicker(e.FundCode.ExchangeTicker)
+		if fundOverview.FundCode.ExchangeTicker != "" {
+			fundOverviewModel.Ticker = ticker.GenYahooTickerFromVanguardTicker(fundOverview.FundCode.ExchangeTicker)
 		}
 	}
 
-	if e.TotalAssets != "" {
-		ta, err := strconv.ParseFloat(e.TotalAssets, 64)
+	if fundOverview.TotalAssets != "" {
+		totalAssets, err := strconv.ParseFloat(fundOverview.TotalAssets, 64)
 
 		if err != nil {
-			l.Warn(ctx, "parse Overview.TotalAssets failed", "error", err, "TotalAssets", e.TotalAssets)
-			ta = 0
+			log.Warn(ctx, "parse Overview.TotalAssets failed", "error", err, "TotalAssets", fundOverview.TotalAssets)
+			totalAssets = 0
 		}
 
-		m.TotalAssets = ta
+		fundOverviewModel.TotalAssets = totalAssets
 	}
 
-	if e.Yield12Month != "" {
-		ym, err := strconv.ParseFloat(e.Yield12Month, 64)
+	if fundOverview.Yield12Month != "" {
+		yield12Month, err := strconv.ParseFloat(fundOverview.Yield12Month, 64)
 
 		if err != nil {
-			l.Warn(ctx, "parse Overview.Yield12Month failed", "error", err, "Yield12Month", e.Yield12Month)
-			ym = 0
+			log.Warn(ctx, "parse Overview.Yield12Month failed", "error", err, "Yield12Month", fundOverview.Yield12Month)
+			yield12Month = 0
 		}
 
-		m.Yield12Month = ym
+		fundOverviewModel.Yield12Month = yield12Month
 	}
 
-	m.Price = e.Price
+	fundOverviewModel.Price = fundOverview.Price
 
-	if e.ManagementFee != "" {
-		v, err := strconv.ParseFloat(e.ManagementFee, 64)
+	if fundOverview.ManagementFee != "" {
+		managementFee, err := strconv.ParseFloat(fundOverview.ManagementFee, 64)
 
 		if err != nil {
-			l.Warn(ctx, "parse Overview.ManagementFee failed", "error", err, "ManagementFee", e.ManagementFee)
-			v = 0
+			log.Warn(ctx, "parse Overview.ManagementFee failed", "error", err, "ManagementFee", fundOverview.ManagementFee)
+			managementFee = 0
 		}
 
-		m.ManagementFee = v
+		fundOverviewModel.ManagementFee = managementFee
 	}
 
-	if e.MerFee != "" {
-		v, err := strconv.ParseFloat(e.MerFee, 64)
+	if fundOverview.MerFee != "" {
+		merFee, err := strconv.ParseFloat(fundOverview.MerFee, 64)
 
 		if err != nil {
-			l.Warn(ctx, "parse Overview.MerValue failed", "error", err, "MerValue", e.MerFee)
-			v = 0
+			log.Warn(ctx, "parse Overview.MerValue failed", "error", err, "MerValue", fundOverview.MerFee)
+			merFee = 0
 		}
 
-		m.MerFee = v
+		fundOverviewModel.MerFee = merFee
 	}
 
-	if e.DistYield != "" {
-		v, err := strconv.ParseFloat(e.DistYield, 64)
+	if fundOverview.DistYield != "" {
+		distYield, err := strconv.ParseFloat(fundOverview.DistYield, 64)
 
 		if err != nil {
-			l.Warn(ctx, "parse Overview.DistYield failed", "error", err, "DistYield", e.DistYield)
-			v = 0
+			log.Warn(ctx, "parse Overview.DistYield failed", "error", err, "DistYield", fundOverview.DistYield)
+			distYield = 0
 		}
 
-		m.DistYield = v
+		fundOverviewModel.DistYield = distYield
 	}
 
-	m.AllocationStock = e.AllocationStock
-	m.AllocationBond = e.AllocationBond
-	m.AllocationCash = e.AllocationCash
+	fundOverviewModel.AllocationStock = fundOverview.AllocationStock
+	fundOverviewModel.AllocationBond = fundOverview.AllocationBond
+	fundOverviewModel.AllocationCash = fundOverview.AllocationCash
 
 	// map sector breakdown model
-	var sectors []*SectorBreakdownModel
-	for _, s := range e.Sectors {
-		sector, err := newSectorBreakdownModel(ctx, l, s)
+	var sectorModels []*SectorBreakdownModel
+	for _, sector := range fundOverview.Sectors {
+		sectorModel, err := newSectorBreakdownModel(ctx, log, sector)
 
 		if err != nil {
 			return nil, err
 		}
 
-		sectors = append(sectors, sector)
+		sectorModels = append(sectorModels, sectorModel)
 	}
-	m.Sectors = sectors
+	fundOverviewModel.Sectors = sectorModels
 
 	// map country breakdown model
-	var countries []*CountryBreakdownModel
-	for _, c := range e.Countries {
-		country, err := newCountryBreakdownModel(ctx, l, c)
+	var countryModels []*CountryBreakdownModel
+	for _, country := range fundOverview.Countries {
+		countryModel, err := newCountryBreakdownModel(ctx, log, country)
 
 		if err != nil {
 			return nil, err
 		}
 
-		if country != nil {
-			countries = append(countries, country)
+		if countryModel != nil {
+			countryModels = append(countryModels, countryModel)
 		}
 	}
-	m.Countries = countries
+	fundOverviewModel.Countries = countryModels
 
 	// map dividend history model
-	var dists []*DividendHistoryModel
-	for _, d := range e.DistHistory {
-		dist, err := newDividendHistoryModel(ctx, l, d)
+	var divHistoryModels []*DividendHistoryModel
+	for _, dividend := range fundOverview.Dividends {
+		divHistoryModel, err := newDividendHistoryModel(ctx, log, dividend)
 
 		if err != nil {
 			return nil, err
 		}
 
-		if dist != nil {
-			dists = append(dists, dist)
+		if divHistoryModel != nil {
+			divHistoryModels = append(divHistoryModels, divHistoryModel)
 		}
 	}
-	m.DividendHistory = dists
+	fundOverviewModel.Dividends = divHistoryModels
 
-	return m, nil
+	return fundOverviewModel, nil
 }
 
 // newSectorBreakdownModel create sector breakdown model
-func newSectorBreakdownModel(ctx context.Context, l logger.ContextLog, e *entities.SectorBreakdown) (*SectorBreakdownModel, error) {
-	var m = &SectorBreakdownModel{}
+func newSectorBreakdownModel(ctx context.Context, log logger.ContextLog, sectorBreakdown *entities.SectorBreakdown) (*SectorBreakdownModel, error) {
+	var sectorBreakdownModel = &SectorBreakdownModel{}
 
-	if e.SectorName != "" {
-		m.SectorName = e.SectorName
+	if sectorBreakdown.SectorName != "" {
+		sectorBreakdownModel.SectorName = sectorBreakdown.SectorName
 
-		sectorCode, err := getSectorCode(e.SectorName)
+		sectorCode, err := getSectorCode(sectorBreakdown.SectorName)
 		if err != nil {
-			l.Warn(ctx, "get sector code failed", "error", err, "SectorName", e.SectorName)
+			log.Warn(ctx, "get sector code failed", "error", err, "SectorName", sectorBreakdown.SectorName)
 		}
 
-		m.SectorCode = sectorCode
+		sectorBreakdownModel.SectorCode = sectorCode
 	}
 
-	if e.FundPercent != "" {
-		v, err := strconv.ParseFloat(e.FundPercent, 64)
+	if sectorBreakdown.FundPercent != "" {
+		fundPercent, err := strconv.ParseFloat(sectorBreakdown.FundPercent, 64)
 
 		if err != nil {
-			l.Warn(ctx, "parse SectorWeighting.FundPercent failed", "error", err, "FundPercent", e.FundPercent)
-			v = 0
+			log.Warn(ctx, "parse SectorWeighting.FundPercent failed", "error", err, "FundPercent", sectorBreakdown.FundPercent)
+			fundPercent = 0
 		}
 
-		m.FundPercent = v
+		sectorBreakdownModel.FundPercent = fundPercent
 	}
 
-	return m, nil
+	return sectorBreakdownModel, nil
 }
 
 // newCountryBreakdownModel create country breakdown model
-func newCountryBreakdownModel(ctx context.Context, l logger.ContextLog, e *entities.CountryBreakdown) (*CountryBreakdownModel, error) {
-	var m = &CountryBreakdownModel{}
+func newCountryBreakdownModel(ctx context.Context, log logger.ContextLog, countryBreakdown *entities.CountryBreakdown) (*CountryBreakdownModel, error) {
+	var countryBreakdownModel = &CountryBreakdownModel{}
 
-	if e.CountryName != "" {
-		m.CountryName = e.CountryName
+	if countryBreakdown.CountryName != "" {
+		countryBreakdownModel.CountryName = countryBreakdown.CountryName
 
-		countryCode, err := getCountryCode(e.CountryName)
+		countryCode, err := getCountryCode(countryBreakdown.CountryName)
 		if err != nil {
-			l.Warn(ctx, "get country code failed", "error", err, "CountryName", e.CountryName)
+			log.Warn(ctx, "get country code failed", "error", err, "CountryName", countryBreakdown.CountryName)
 		}
 
-		m.CountryCode = countryCode
+		countryBreakdownModel.CountryCode = countryCode
 	}
 
-	if e.HoldingStatCode != "" {
-		m.HoldingStatCode = e.HoldingStatCode
+	if countryBreakdown.HoldingStatCode != "" {
+		countryBreakdownModel.HoldingStatCode = countryBreakdown.HoldingStatCode
 	}
 
-	if e.FundMktPercent != "" {
-		v, err := strconv.ParseFloat(e.FundMktPercent, 64)
+	if countryBreakdown.FundMktPercent != "" {
+		fundMktPercent, err := strconv.ParseFloat(countryBreakdown.FundMktPercent, 64)
 
 		if err != nil {
-			l.Warn(ctx, "parse CountryExposure.FundMktPercent failed", "error", err, "FundMktPercent", e.FundMktPercent)
-			v = 0
+			log.Warn(ctx, "parse CountryExposure.FundMktPercent failed", "error", err, "FundMktPercent", countryBreakdown.FundMktPercent)
+			fundMktPercent = 0
 		}
 
-		if v == 0 {
+		if fundMktPercent == 0 {
 			// not interested in fund market with 0 percent
 			return nil, nil
 		}
 
-		m.FundMktPercent = v
+		countryBreakdownModel.FundMktPercent = fundMktPercent
 	}
 
-	if e.FundTnaPercent != "" {
-		v, err := strconv.ParseFloat(e.FundTnaPercent, 64)
+	if countryBreakdown.FundTnaPercent != "" {
+		fundTnaPercent, err := strconv.ParseFloat(countryBreakdown.FundTnaPercent, 64)
 
 		if err != nil {
-			l.Warn(ctx, "parse CountryExposure.FundTnaPercent failed", "error", err, "FundTnaPercent", e.FundTnaPercent)
-			v = 0
+			log.Warn(ctx, "parse CountryExposure.FundTnaPercent failed", "error", err, "FundTnaPercent", countryBreakdown.FundTnaPercent)
+			fundTnaPercent = 0
 		}
 
-		m.FundTnaPercent = v
+		countryBreakdownModel.FundTnaPercent = fundTnaPercent
 	}
 
-	return m, nil
+	return countryBreakdownModel, nil
 }
 
 // newDividendHistoryModel create dividend history model
-func newDividendHistoryModel(ctx context.Context, l logger.ContextLog, e *entities.DividendHistory) (*DividendHistoryModel, error) {
-	var m = &DividendHistoryModel{}
+func newDividendHistoryModel(ctx context.Context, log logger.ContextLog, dividendHistories *entities.DividendHistory) (*DividendHistoryModel, error) {
+	var dividentHistoryModel = &DividendHistoryModel{}
 
-	m.CurrencyCode = e.CurrencyCode
+	dividentHistoryModel.CurrencyCode = dividendHistories.CurrencyCode
 
-	if e.Amount != "" {
-		v, err := strconv.ParseFloat(e.Amount, 64)
+	if dividendHistories.Amount != "" {
+		amount, err := strconv.ParseFloat(dividendHistories.Amount, 64)
 		if err != nil {
-			l.Warn(ctx, "parse DistHistory.Amount failed", "error", err, "Amount", e.Amount)
-			v = 0
+			log.Warn(ctx, "parse DistHistory.Amount failed", "error", err, "Amount", dividendHistories.Amount)
+			amount = 0
 		}
 
-		if v == 0 {
+		if amount == 0 {
 			// not interested in dividend with 0 amount
 			return nil, nil
 		}
 
-		m.Amount = v
+		dividentHistoryModel.Amount = amount
 	}
 
-	if e.CurrencyCode != "" {
-		v, err := datetime.GetDateStartFromString(e.AsOfDate)
+	if dividendHistories.CurrencyCode != "" {
+		asOfDate, err := datetime.GetStarDateFromString(dividendHistories.AsOfDate)
 		if err != nil {
-			l.Warn(ctx, "parse DistHistory.AsOfDate failed", "error", err, "AsOfDate", e.AsOfDate)
-			v = nil
+			log.Warn(ctx, "parse DistHistory.AsOfDate failed", "error", err, "AsOfDate", dividendHistories.AsOfDate)
+			asOfDate = nil
 		}
 
-		m.AsOfDate = v
+		dividentHistoryModel.AsOfDate = asOfDate
 	}
 
-	return m, nil
+	return dividentHistoryModel, nil
 }
 
 // getCountryCode gets country code of a given name
 func getCountryCode(name string) (string, error) {
-	for _, v := range consts.Countries {
-		if strings.EqualFold(strings.ToUpper(v.Name), strings.ToUpper(name)) {
-			return v.Alpha3Code, nil
+	for _, country := range consts.Countries {
+		if strings.EqualFold(strings.ToUpper(country.Name), strings.ToUpper(name)) {
+			return country.Alpha3Code, nil
 		}
 	}
 	return "OTH", fmt.Errorf("cannot find country code for country %s", name)
@@ -341,9 +341,9 @@ func getCountryCode(name string) (string, error) {
 
 // getSectorCode gets sector code of a given name
 func getSectorCode(name string) (string, error) {
-	for _, v := range consts.Sectors {
-		if strings.EqualFold(strings.ToUpper(v.Name), strings.ToUpper(name)) {
-			return v.Code, nil
+	for _, sector := range consts.Sectors {
+		if strings.EqualFold(strings.ToUpper(sector.Name), strings.ToUpper(name)) {
+			return sector.Code, nil
 		}
 	}
 	return "OTH", fmt.Errorf("cannot find sector code for sector %s", name)

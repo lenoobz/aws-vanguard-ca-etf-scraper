@@ -7,6 +7,12 @@ const (
 	VANGUARD_OVERVIEW_COL = "overview" // Should match with Colnames's key of AppConf
 )
 
+const (
+	BOND     = "BOND"
+	EQUITY   = "EQUITY"
+	BALANCED = "BALANCED"
+)
+
 var Sectors = []struct {
 	Name string
 	Code string

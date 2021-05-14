@@ -3,6 +3,7 @@ package scraper
 import (
 	"context"
 	"encoding/json"
+	"strings"
 	"time"
 
 	"github.com/gocolly/colly"
@@ -11,37 +12,38 @@ import (
 	corid "github.com/hthl85/aws-lambda-corid"
 	logger "github.com/hthl85/aws-lambda-logger"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/config"
+	"github.com/hthl85/aws-vanguard-ca-etf-scraper/consts"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/entities"
-	"github.com/hthl85/aws-vanguard-ca-etf-scraper/usecase/fund"
+	"github.com/hthl85/aws-vanguard-ca-etf-scraper/usecase/funds"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/usecase/holding"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/usecase/overview"
 )
 
 // FundScraper struct
 type FundScraper struct {
-	FundJob         *colly.Collector
-	HoldingJob      *colly.Collector
-	OverviewJob     *colly.Collector
-	fundService     *fund.Service
-	holdingService  *holding.Service
-	overviewService *overview.Service
-	log             logger.ContextLog
+	ScrapeFundListJob     *colly.Collector
+	ScrapeFundHoldingJob  *colly.Collector
+	ScrapeFundOverviewJob *colly.Collector
+	fundService           *funds.Service
+	holdingService        *holding.Service
+	overviewService       *overview.Service
+	log                   logger.ContextLog
 }
 
 // NewFundScraper create new fund scraper
-func NewFundScraper(fs *fund.Service, hs *holding.Service, os *overview.Service, l logger.ContextLog) *FundScraper {
-	fj := newScraperJob()
-	hj := newScraperJob()
-	oj := newScraperJob()
+func NewFundScraper(fundService *funds.Service, holdingService *holding.Service, overviewService *overview.Service, log logger.ContextLog) *FundScraper {
+	scrapeFundListJob := newScraperJob()
+	scrapeFundHoldingJob := newScraperJob()
+	scrapeFundOverviewJob := newScraperJob()
 
 	return &FundScraper{
-		FundJob:         fj,
-		HoldingJob:      hj,
-		OverviewJob:     oj,
-		fundService:     fs,
-		holdingService:  hs,
-		overviewService: os,
-		log:             l,
+		ScrapeFundListJob:     scrapeFundListJob,
+		ScrapeFundHoldingJob:  scrapeFundHoldingJob,
+		ScrapeFundOverviewJob: scrapeFundOverviewJob,
+		fundService:           fundService,
+		holdingService:        holdingService,
+		overviewService:       overviewService,
+		log:                   log,
 	}
 }
 
@@ -60,7 +62,7 @@ func newScraperJob() *colly.Collector {
 	c.Limit(&colly.LimitRule{
 		DomainGlob:  config.DomainGlob,
 		Parallelism: 2,
-		RandomDelay: 5 * time.Second,
+		RandomDelay: 2 * time.Second,
 	})
 
 	extensions.RandomUserAgent(c)
@@ -71,29 +73,29 @@ func newScraperJob() *colly.Collector {
 
 // configJobs configs on error handler and on response handler for scaper jobs
 func (s *FundScraper) configJobs() {
-	s.FundJob.OnError(s.errorHandler)
-	s.FundJob.OnResponse(s.processFundListResponse)
+	s.ScrapeFundListJob.OnError(s.errorHandler)
+	s.ScrapeFundListJob.OnResponse(s.processFundListResponse)
 
-	s.HoldingJob.OnError(s.errorHandler)
-	s.HoldingJob.OnResponse(s.processFundHoldingResponse)
+	s.ScrapeFundHoldingJob.OnError(s.errorHandler)
+	s.ScrapeFundHoldingJob.OnResponse(s.processFundHoldingResponse)
 
-	s.OverviewJob.OnError(s.errorHandler)
-	s.OverviewJob.OnResponse(s.processFundOverviewResponse)
+	s.ScrapeFundOverviewJob.OnError(s.errorHandler)
+	s.ScrapeFundOverviewJob.OnResponse(s.processFundOverviewResponse)
 }
 
-// StartJobs start jobs
-func (s *FundScraper) StartJobs() {
+// ScrapeAllVanguardFundsDetails scrape all Vanguard funds details
+func (s *FundScraper) ScrapeAllVanguardFundsDetails() {
 	ctx := context.Background()
 
 	s.configJobs()
 
-	if err := s.FundJob.Visit(config.FundListURL); err != nil {
+	if err := s.ScrapeFundListJob.Visit(config.FundListURL); err != nil {
 		s.log.Error(ctx, "scrape fund list failed", "error", err)
 	}
 
-	s.FundJob.Wait()
-	s.HoldingJob.Wait()
-	s.OverviewJob.Wait()
+	s.ScrapeFundListJob.Wait()
+	s.ScrapeFundHoldingJob.Wait()
+	s.ScrapeFundOverviewJob.Wait()
 }
 
 ///////////////////////////////////////////////////////////
@@ -132,7 +134,7 @@ func (s *FundScraper) processFundListResponse(r *colly.Response) {
 			// scrape overview data
 			overviewURL := config.GetFundOverviewURL(key)
 			overviewCTX := colly.NewContext()
-			s.OverviewJob.Request("GET", overviewURL, nil, overviewCTX, nil)
+			s.ScrapeFundOverviewJob.Request("GET", overviewURL, nil, overviewCTX, nil)
 
 			// scrape holding data
 			holdingURL := config.GetFundHoldingURL(key, "F", fund.AssetCode)
@@ -140,7 +142,7 @@ func (s *FundScraper) processFundListResponse(r *colly.Response) {
 			holdingCTX.Put("portId", key)
 			holdingCTX.Put("ticker", fund.Ticker)
 			holdingCTX.Put("assetCode", fund.AssetCode)
-			s.HoldingJob.Request("GET", holdingURL, nil, holdingCTX, nil)
+			s.ScrapeFundHoldingJob.Request("GET", holdingURL, nil, holdingCTX, nil)
 		}
 	}
 }
@@ -160,7 +162,7 @@ func (s *FundScraper) processFundOverviewResponse(r *colly.Response) {
 		return
 	}
 
-	if err := s.overviewService.CreateOverview(ctx, overview); err != nil {
+	if err := s.overviewService.CreateFundOverview(ctx, overview); err != nil {
 		s.log.Error(ctx, "failed to create overview", "portId", overview.PortID, "error", err)
 	}
 }
@@ -184,15 +186,15 @@ func (s *FundScraper) processFundHoldingResponse(r *colly.Response) {
 		AssetCode: assetCode,
 	}
 
-	if assetCode == "BOND" {
+	if strings.EqualFold(assetCode, consts.BOND) {
 		if err := json.Unmarshal(r.Body, &holding.Bonds); err != nil {
 			s.log.Error(ctx, "failed to parse bond holding response", "error", err)
 		}
-	} else if assetCode == "EQUITY" {
+	} else if strings.EqualFold(assetCode, consts.EQUITY) {
 		if err := json.Unmarshal(r.Body, &holding.Equities); err != nil {
 			s.log.Error(ctx, "failed to parse equity holding response", "error", err)
 		}
-	} else if assetCode == "BALANCED" {
+	} else if strings.EqualFold(assetCode, consts.BALANCED) {
 		if err := json.Unmarshal(r.Body, &holding.Balances); err != nil {
 			s.log.Error(ctx, "failed to parse balanced holding response", "error", err)
 		}
@@ -201,7 +203,7 @@ func (s *FundScraper) processFundHoldingResponse(r *colly.Response) {
 		return
 	}
 
-	if err := s.holdingService.CreateHolding(ctx, holding); err != nil {
+	if err := s.holdingService.CreateFundHolding(ctx, holding); err != nil {
 		s.log.Error(ctx, "failed to create holding", "portId", portID, "error", err)
 	}
 }

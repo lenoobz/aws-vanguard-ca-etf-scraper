@@ -2,8 +2,10 @@ package models
 
 import (
 	"context"
+	"strings"
 
 	logger "github.com/hthl85/aws-lambda-logger"
+	"github.com/hthl85/aws-vanguard-ca-etf-scraper/consts"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/entities"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/utils/ticker"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -41,196 +43,196 @@ type SectorWeightStockModel struct {
 	Type             string  `bson:"type,omitempty"`
 }
 
-// NewHoldingModel create a fund holding model
-func NewHoldingModel(ctx context.Context, l logger.ContextLog, e *entities.VanguardFundHolding) (*VanguardFundHoldingModel, error) {
-	if e.AssetCode == "BOND" {
-		return newBondHolding(ctx, l, e)
+// NewFundHoldingModel create a fund holding model
+func NewFundHoldingModel(ctx context.Context, log logger.ContextLog, fundHolding *entities.VanguardFundHolding) (*VanguardFundHoldingModel, error) {
+	if strings.EqualFold(fundHolding.AssetCode, consts.BOND) {
+		return newBondHolding(ctx, log, fundHolding)
 	}
 
-	if e.AssetCode == "EQUITY" {
-		return newEquityHolding(ctx, l, e)
+	if strings.EqualFold(fundHolding.AssetCode, consts.EQUITY) {
+		return newEquityHolding(ctx, log, fundHolding)
 	}
 
-	if e.AssetCode == "BALANCED" {
-		return newBalanceHolding(ctx, l, e)
+	if strings.EqualFold(fundHolding.AssetCode, consts.BALANCED) {
+		return newBalanceHolding(ctx, log, fundHolding)
 	}
 
 	return nil, nil
 }
 
-func newBondHolding(ctx context.Context, l logger.ContextLog, e *entities.VanguardFundHolding) (*VanguardFundHoldingModel, error) {
-	var m = &VanguardFundHoldingModel{}
+func newBondHolding(ctx context.Context, log logger.ContextLog, fundHolding *entities.VanguardFundHolding) (*VanguardFundHoldingModel, error) {
+	var fundHoldingModel = &VanguardFundHoldingModel{}
 
-	if e.PortID != "" {
-		m.PortID = e.PortID
+	if fundHolding.PortID != "" {
+		fundHoldingModel.PortID = fundHolding.PortID
 	}
 
-	if e.Ticker != "" {
-		m.Ticker = ticker.GetYahooTicker(e.Ticker)
+	if fundHolding.Ticker != "" {
+		fundHoldingModel.Ticker = ticker.GenYahooTickerFromVanguardTicker(fundHolding.Ticker)
 	}
 
-	m.AssetCode = e.AssetCode
+	fundHoldingModel.AssetCode = fundHolding.AssetCode
 
-	if len(e.Bonds) == 1 {
-		var bonds []*SectorWeightBondModel
-		holding := e.Bonds[0]
+	if len(fundHolding.Bonds) == 1 {
+		var sectorWeightBondModels []*SectorWeightBondModel
+		holding := fundHolding.Bonds[0]
 
-		for _, v := range holding.SectorWeightBond {
-			bond, err := newSectorWeightBondModel(ctx, l, v)
+		for _, sectorWeightBond := range holding.SectorWeightBonds {
+			sectorWeightBondModel, err := newSectorWeightBondModel(ctx, log, sectorWeightBond)
 			if err != nil {
 				continue
 			}
 
-			bonds = append(bonds, bond)
+			sectorWeightBondModels = append(sectorWeightBondModels, sectorWeightBondModel)
 		}
 
-		m.Bonds = bonds
+		fundHoldingModel.Bonds = sectorWeightBondModels
 	}
 
-	return m, nil
+	return fundHoldingModel, nil
 }
 
-func newEquityHolding(ctx context.Context, l logger.ContextLog, e *entities.VanguardFundHolding) (*VanguardFundHoldingModel, error) {
-	var m = &VanguardFundHoldingModel{}
+func newEquityHolding(ctx context.Context, log logger.ContextLog, fundHolding *entities.VanguardFundHolding) (*VanguardFundHoldingModel, error) {
+	var fundHoldingModel = &VanguardFundHoldingModel{}
 
-	if e.PortID != "" {
-		m.PortID = e.PortID
+	if fundHolding.PortID != "" {
+		fundHoldingModel.PortID = fundHolding.PortID
 	}
 
-	if e.Ticker != "" {
-		m.Ticker = e.Ticker
+	if fundHolding.Ticker != "" {
+		fundHoldingModel.Ticker = fundHolding.Ticker
 	}
 
-	m.AssetCode = e.AssetCode
+	fundHoldingModel.AssetCode = fundHolding.AssetCode
 
-	if len(e.Equities) == 1 {
-		var stocks []*SectorWeightStockModel
-		holding := e.Equities[0]
+	if len(fundHolding.Equities) == 1 {
+		var sectorWeightStockModels []*SectorWeightStockModel
+		holding := fundHolding.Equities[0]
 
-		for _, v := range holding.SectorWeightStock {
-			stock, err := newSectorWeightStockModel(ctx, l, v)
+		for _, sectorWeightStock := range holding.SectorWeightStocks {
+			sectorWeightStockModel, err := newSectorWeightStockModel(ctx, log, sectorWeightStock)
 			if err != nil {
 				continue
 			}
 
-			stocks = append(stocks, stock)
+			sectorWeightStockModels = append(sectorWeightStockModels, sectorWeightStockModel)
 		}
 
-		m.Stocks = stocks
+		fundHoldingModel.Stocks = sectorWeightStockModels
 	}
 
-	return m, nil
+	return fundHoldingModel, nil
 }
 
-func newBalanceHolding(ctx context.Context, l logger.ContextLog, e *entities.VanguardFundHolding) (*VanguardFundHoldingModel, error) {
-	var m = &VanguardFundHoldingModel{}
+func newBalanceHolding(ctx context.Context, log logger.ContextLog, fundHolding *entities.VanguardFundHolding) (*VanguardFundHoldingModel, error) {
+	var fundHoldingModel = &VanguardFundHoldingModel{}
 
-	if e.PortID != "" {
-		m.PortID = e.PortID
+	if fundHolding.PortID != "" {
+		fundHoldingModel.PortID = fundHolding.PortID
 	}
 
-	if e.Ticker != "" {
-		m.Ticker = e.Ticker
+	if fundHolding.Ticker != "" {
+		fundHoldingModel.Ticker = fundHolding.Ticker
 	}
 
-	m.AssetCode = e.AssetCode
+	fundHoldingModel.AssetCode = fundHolding.AssetCode
 
-	if len(e.Balances) == 1 {
-		var stocks []*SectorWeightStockModel
-		var bonds []*SectorWeightBondModel
-		holding := e.Balances[0]
+	if len(fundHolding.Balances) == 1 {
+		var sectorWeightStockModels []*SectorWeightStockModel
+		var sectorWeightBondModels []*SectorWeightBondModel
+		holding := fundHolding.Balances[0]
 
-		for _, v := range holding.SectorWeightStock {
-			stock, err := newSectorWeightStockModel(ctx, l, v)
+		for _, sectorWeightStock := range holding.SectorWeightStocks {
+			sectorWeightStockModel, err := newSectorWeightStockModel(ctx, log, sectorWeightStock)
 			if err != nil {
 				continue
 			}
 
-			stocks = append(stocks, stock)
+			sectorWeightStockModels = append(sectorWeightStockModels, sectorWeightStockModel)
 		}
 
-		for _, v := range holding.SectorWeightBond {
-			bond, err := newSectorWeightBondModel(ctx, l, v)
+		for _, sectorWeightBond := range holding.SectorWeightBonds {
+			sectorWeightBondModel, err := newSectorWeightBondModel(ctx, log, sectorWeightBond)
 			if err != nil {
 				continue
 			}
 
-			bonds = append(bonds, bond)
+			sectorWeightBondModels = append(sectorWeightBondModels, sectorWeightBondModel)
 		}
 
-		m.Bonds = bonds
-		m.Stocks = stocks
+		fundHoldingModel.Bonds = sectorWeightBondModels
+		fundHoldingModel.Stocks = sectorWeightStockModels
 	}
 
-	return m, nil
+	return fundHoldingModel, nil
 }
 
-func newSectorWeightBondModel(ctx context.Context, l logger.ContextLog, e *entities.SectorWeightBond) (*SectorWeightBondModel, error) {
-	var m = &SectorWeightBondModel{}
+func newSectorWeightBondModel(ctx context.Context, log logger.ContextLog, sectorWeightBond *entities.SectorWeightBond) (*SectorWeightBondModel, error) {
+	var sectorWeightBondModel = &SectorWeightBondModel{}
 
-	if e.MarketValPercent != "" {
-		v, err := e.MarketValPercent.Float64()
+	if sectorWeightBond.MarketValPercent != "" {
+		marketValPercent, err := sectorWeightBond.MarketValPercent.Float64()
 		if err != nil {
-			l.Warn(ctx, "parse SectorWeightBond.MarketValPercent failed", "error", err, "MarketValPercent", e.MarketValPercent)
-			v = 0
+			log.Warn(ctx, "parse SectorWeightBond.MarketValPercent failed", "error", err, "MarketValPercent", sectorWeightBond.MarketValPercent)
+			marketValPercent = 0
 		}
 
-		m.MarketValPercent = v
+		sectorWeightBondModel.MarketValPercent = marketValPercent
 	}
 
-	if e.MarketValue != "" {
-		v, err := e.MarketValue.Float64()
+	if sectorWeightBond.MarketValue != "" {
+		marketValue, err := sectorWeightBond.MarketValue.Float64()
 		if err != nil {
-			l.Warn(ctx, "parse SectorWeightBond.MarketValue failed", "error", err, "MarketValue", e.MarketValue)
-			v = 0
+			log.Warn(ctx, "parse SectorWeightBond.MarketValue failed", "error", err, "MarketValue", sectorWeightBond.MarketValue)
+			marketValue = 0
 		}
 
-		m.MarketValue = v
+		sectorWeightBondModel.MarketValue = marketValue
 	}
 
-	if e.Type != "" {
-		m.Type = e.Type
+	if sectorWeightBond.Type != "" {
+		sectorWeightBondModel.Type = sectorWeightBond.Type
 	}
 
-	m.FaceAmount = e.FaceAmount
+	sectorWeightBondModel.FaceAmount = sectorWeightBond.FaceAmount
 
-	m.Rate = e.Rate
+	sectorWeightBondModel.Rate = sectorWeightBond.Rate
 
-	return m, nil
+	return sectorWeightBondModel, nil
 }
 
-func newSectorWeightStockModel(ctx context.Context, l logger.ContextLog, e *entities.SectorWeightStock) (*SectorWeightStockModel, error) {
-	var m = &SectorWeightStockModel{}
+func newSectorWeightStockModel(ctx context.Context, log logger.ContextLog, sectorWeightStock *entities.SectorWeightStock) (*SectorWeightStockModel, error) {
+	var sectorWeightStockModel = &SectorWeightStockModel{}
 
-	if e.Symbol != "" {
-		m.Symbol = e.Symbol
+	if sectorWeightStock.Symbol != "" {
+		sectorWeightStockModel.Symbol = sectorWeightStock.Symbol
 	}
 
-	if e.MarketValPercent != "" {
-		v, err := e.MarketValPercent.Float64()
+	if sectorWeightStock.MarketValPercent != "" {
+		marketValPercent, err := sectorWeightStock.MarketValPercent.Float64()
 		if err != nil {
-			l.Warn(ctx, "parse SectorWeightStock.MarketValPercent failed", "error", err, "MarketValPercent", e.MarketValPercent)
-			v = 0
+			log.Warn(ctx, "parse SectorWeightStock.MarketValPercent failed", "error", err, "MarketValPercent", sectorWeightStock.MarketValPercent)
+			marketValPercent = 0
 		}
 
-		m.MarketValPercent = v
+		sectorWeightStockModel.MarketValPercent = marketValPercent
 	}
 
-	if e.MarketValue != "" {
-		v, err := e.MarketValPercent.Float64()
+	if sectorWeightStock.MarketValue != "" {
+		marketValue, err := sectorWeightStock.MarketValue.Float64()
 		if err != nil {
-			l.Warn(ctx, "parse SectorWeightStock.MarketValue failed", "error", err, "MarketValue", e.MarketValue)
-			v = 0
+			log.Warn(ctx, "parse SectorWeightStock.MarketValue failed", "error", err, "MarketValue", sectorWeightStock.MarketValue)
+			marketValue = 0
 		}
 
-		m.MarketValue = v
+		sectorWeightStockModel.MarketValue = marketValue
 	}
 
-	if e.Type != "" {
-		m.Type = e.Type
+	if sectorWeightStock.Type != "" {
+		sectorWeightStockModel.Type = sectorWeightStock.Type
 	}
 
-	m.Shares = e.Shares
+	sectorWeightStockModel.Shares = sectorWeightStock.Shares
 
-	return m, nil
+	return sectorWeightStockModel, nil
 }

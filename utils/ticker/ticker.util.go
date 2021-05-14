@@ -2,7 +2,7 @@ package ticker
 
 import "fmt"
 
-// GetYahooTicker gets yahoo ticker
-func GetYahooTicker(vanguardTicker string) string {
+// GenYahooTickerFromVanguardTicker gen yahoo ticker from vanguard ticker
+func GenYahooTickerFromVanguardTicker(vanguardTicker string) string {
 	return fmt.Sprintf("%s.TO", vanguardTicker)
 }

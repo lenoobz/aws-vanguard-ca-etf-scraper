@@ -14,18 +14,18 @@ type VanguardFundHolding struct {
 
 // BondHolding represents fund bond holding details
 type BondHolding struct {
-	SectorWeightBond []*SectorWeightBond `json:"sectorWeightBond,omitempty"`
+	SectorWeightBonds []*SectorWeightBond `json:"sectorWeightBond,omitempty"`
 }
 
 // EquityHolding represents fund equity holding details
 type EquityHolding struct {
-	SectorWeightStock []*SectorWeightStock `json:"sectorWeightStock,omitempty"`
+	SectorWeightStocks []*SectorWeightStock `json:"sectorWeightStock,omitempty"`
 }
 
 // BalancedHolding represents fund balance holding details
 type BalancedHolding struct {
-	SectorWeightBond  []*SectorWeightBond  `json:"sectorWeightBond,omitempty"`
-	SectorWeightStock []*SectorWeightStock `json:"sectorWeightStock,omitempty"`
+	SectorWeightBonds  []*SectorWeightBond  `json:"sectorWeightBond,omitempty"`
+	SectorWeightStocks []*SectorWeightStock `json:"sectorWeightStock,omitempty"`
 }
 
 ///////////////////////////////////////////////////////////
@@ -36,8 +36,8 @@ type BalancedHolding struct {
 type SectorWeightBond struct {
 	MarketValPercent json.Number `json:"marketValPercent,omitempty"`
 	MarketValue      json.Number `json:"marketValue,omitempty"`
-	Rate             float64     `json:"rate,omitempty"`
 	FaceAmount       float64     `json:"faceAmount,omitempty"`
+	Rate             float64     `json:"rate,omitempty"`
 	Type             string      `json:"type,omitempty"`
 }
 

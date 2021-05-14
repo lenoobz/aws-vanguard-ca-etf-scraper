@@ -25,44 +25,44 @@ type VanguardFundModel struct {
 }
 
 // NewVanguardFundModel create Vanguard fund model
-func NewVanguardFundModel(e *entities.VanguardFund) (*VanguardFundModel, error) {
-	var m = &VanguardFundModel{}
+func NewVanguardFundModel(vanguardFund *entities.VanguardFund) (*VanguardFundModel, error) {
+	var fundModel = &VanguardFundModel{}
 
-	if e.Ticker != "" {
-		m.Ticker = ticker.GetYahooTicker(e.Ticker)
+	if vanguardFund.Ticker != "" {
+		fundModel.Ticker = ticker.GenYahooTickerFromVanguardTicker(vanguardFund.Ticker)
 	}
 
-	if e.Name != "" {
-		m.Name = e.Name
+	if vanguardFund.Name != "" {
+		fundModel.Name = vanguardFund.Name
 	}
 
-	if e.AssetCode != "" {
-		m.AssetCode = e.AssetCode
+	if vanguardFund.AssetCode != "" {
+		fundModel.AssetCode = vanguardFund.AssetCode
 	}
 
-	if e.Currency != "" {
-		m.Currency = e.Currency
+	if vanguardFund.Currency != "" {
+		fundModel.Currency = vanguardFund.Currency
 	}
 
-	if e.IssueType != "" {
-		m.IssueType = e.IssueType
+	if vanguardFund.IssueType != "" {
+		fundModel.IssueType = vanguardFund.IssueType
 	}
 
-	if e.PortID != "" {
-		m.PortID = e.PortID
+	if vanguardFund.PortID != "" {
+		fundModel.PortID = vanguardFund.PortID
 	}
 
-	if e.ProductType != "" {
-		m.ProductType = e.ProductType
+	if vanguardFund.ProductType != "" {
+		fundModel.ProductType = vanguardFund.ProductType
 	}
 
-	if e.ManagementFee != "" {
-		m.ManagementFee = e.ManagementFee
+	if vanguardFund.ManagementFee != "" {
+		fundModel.ManagementFee = vanguardFund.ManagementFee
 	}
 
-	if e.MerFee != "" {
-		m.MerFee = e.MerFee
+	if vanguardFund.MerFee != "" {
+		fundModel.MerFee = vanguardFund.MerFee
 	}
 
-	return m, nil
+	return fundModel, nil
 }

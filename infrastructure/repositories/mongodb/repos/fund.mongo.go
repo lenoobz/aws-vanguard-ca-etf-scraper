@@ -24,11 +24,11 @@ type FundMongo struct {
 }
 
 // NewFundMongo creates new fund mongo repo
-func NewFundMongo(db *mongo.Database, l logger.ContextLog, conf *config.MongoConfig) (*FundMongo, error) {
+func NewFundMongo(db *mongo.Database, log logger.ContextLog, conf *config.MongoConfig) (*FundMongo, error) {
 	if db != nil {
 		return &FundMongo{
 			db:   db,
-			log:  l,
+			log:  log,
 			conf: conf,
 		}, nil
 	}
@@ -68,7 +68,7 @@ func NewFundMongo(db *mongo.Database, l logger.ContextLog, conf *config.MongoCon
 	return &FundMongo{
 		db:     client.Database(conf.Dbname),
 		client: client,
-		log:    l,
+		log:    log,
 		conf:   conf,
 	}, nil
 }
@@ -92,12 +92,12 @@ func (r *FundMongo) Close() {
 ///////////////////////////////////////////////////////////////////////////////
 
 // InsertFund inserts new fund
-func (r *FundMongo) InsertFund(ctx context.Context, e *entities.VanguardFund) error {
+func (r *FundMongo) InsertFund(ctx context.Context, fund *entities.VanguardFund) error {
 	// create new context for the query
 	ctx, cancel := createContext(ctx, r.conf.TimeoutMS)
 	defer cancel()
 
-	m, err := models.NewVanguardFundModel(e)
+	fundModel, err := models.NewVanguardFundModel(fund)
 	if err != nil {
 		r.log.Error(ctx, "create model failed", "error", err)
 		return err
@@ -111,19 +111,19 @@ func (r *FundMongo) InsertFund(ctx context.Context, e *entities.VanguardFund) er
 	}
 	col := r.db.Collection(colname)
 
-	m.IsActive = true
-	m.Schema = r.conf.SchemaVersion
-	m.ModifiedAt = time.Now().UTC().Unix()
+	fundModel.IsActive = true
+	fundModel.Schema = r.conf.SchemaVersion
+	fundModel.ModifiedAt = time.Now().UTC().Unix()
 
 	filter := bson.D{{
 		Key:   "ticker",
-		Value: m.Ticker,
+		Value: fundModel.Ticker,
 	}}
 
 	update := bson.D{
 		{
 			Key:   "$set",
-			Value: m,
+			Value: fundModel,
 		},
 		{
 			Key: "$setOnInsert",
@@ -145,13 +145,13 @@ func (r *FundMongo) InsertFund(ctx context.Context, e *entities.VanguardFund) er
 	return nil
 }
 
-// InsertOverview inserts fund overview
-func (r *FundMongo) InsertOverview(ctx context.Context, e *entities.VanguardFundOverview) error {
+// InsertFundOverview inserts fund overview
+func (r *FundMongo) InsertFundOverview(ctx context.Context, fundOverview *entities.VanguardFundOverview) error {
 	// create new context for the query
 	ctx, cancel := createContext(ctx, r.conf.TimeoutMS)
 	defer cancel()
 
-	m, err := models.NewOverviewModel(ctx, r.log, e)
+	fundOverviewModel, err := models.NewFundOverviewModel(ctx, r.log, fundOverview)
 	if err != nil {
 		r.log.Error(ctx, "create model failed", "error", err)
 		return err
@@ -164,19 +164,19 @@ func (r *FundMongo) InsertOverview(ctx context.Context, e *entities.VanguardFund
 	}
 	col := r.db.Collection(colname)
 
-	m.IsActive = true
-	m.Schema = r.conf.SchemaVersion
-	m.ModifiedAt = time.Now().UTC().Unix()
+	fundOverviewModel.IsActive = true
+	fundOverviewModel.Schema = r.conf.SchemaVersion
+	fundOverviewModel.ModifiedAt = time.Now().UTC().Unix()
 
 	filter := bson.D{{
 		Key:   "ticker",
-		Value: m.Ticker,
+		Value: fundOverviewModel.Ticker,
 	}}
 
 	update := bson.D{
 		{
 			Key:   "$set",
-			Value: m,
+			Value: fundOverviewModel,
 		},
 		{
 			Key: "$setOnInsert",
@@ -198,13 +198,13 @@ func (r *FundMongo) InsertOverview(ctx context.Context, e *entities.VanguardFund
 	return nil
 }
 
-// InsertHolding inserts fund holding
-func (r *FundMongo) InsertHolding(ctx context.Context, e *entities.VanguardFundHolding) error {
+// InsertFundHolding inserts fund holding
+func (r *FundMongo) InsertFundHolding(ctx context.Context, fundHolding *entities.VanguardFundHolding) error {
 	// create new context for the query
 	ctx, cancel := createContext(ctx, r.conf.TimeoutMS)
 	defer cancel()
 
-	m, err := models.NewHoldingModel(ctx, r.log, e)
+	fundHoldingModel, err := models.NewFundHoldingModel(ctx, r.log, fundHolding)
 	if err != nil {
 		r.log.Error(ctx, "create model failed", "error", err)
 		return err
@@ -217,19 +217,19 @@ func (r *FundMongo) InsertHolding(ctx context.Context, e *entities.VanguardFundH
 	}
 	col := r.db.Collection(colname)
 
-	m.IsActive = true
-	m.Schema = r.conf.SchemaVersion
-	m.ModifiedAt = time.Now().UTC().Unix()
+	fundHoldingModel.IsActive = true
+	fundHoldingModel.Schema = r.conf.SchemaVersion
+	fundHoldingModel.ModifiedAt = time.Now().UTC().Unix()
 
 	filter := bson.D{{
 		Key:   "ticker",
-		Value: m.Ticker,
+		Value: fundHoldingModel.Ticker,
 	}}
 
 	update := bson.D{
 		{
 			Key:   "$set",
-			Value: m,
+			Value: fundHoldingModel,
 		},
 		{
 			Key: "$setOnInsert",

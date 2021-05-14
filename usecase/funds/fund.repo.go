@@ -1,4 +1,4 @@
-package fund
+package funds
 
 import (
 	"context"
@@ -15,7 +15,7 @@ type Reader interface{}
 
 // Writer interface
 type Writer interface {
-	InsertFund(context.Context, *entities.VanguardFund) error
+	InsertFund(ctx context.Context, fund *entities.VanguardFund) error
 }
 
 // Repo interface

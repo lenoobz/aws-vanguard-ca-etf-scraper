@@ -20,7 +20,7 @@ type VanguardFundOverview struct {
 	FundCode         *FundCode           `json:"fundCodesData,omitempty"`
 	Sectors          []*SectorBreakdown  `json:"sectorWeighting,omitempty"`
 	Countries        []*CountryBreakdown `json:"countryExposure,omitempty"`
-	DistHistory      []*DividendHistory  `json:"distHistory,omitempty"`
+	Dividends        []*DividendHistory  `json:"distHistory,omitempty"`
 }
 
 // FundCode struct

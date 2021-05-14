@@ -15,7 +15,7 @@ type Reader interface{}
 
 // Writer interface
 type Writer interface {
-	InsertOverview(context.Context, *entities.VanguardFundOverview) error
+	InsertFundOverview(ctx context.Context, fundOverview *entities.VanguardFundOverview) error
 }
 
 // Repo interface

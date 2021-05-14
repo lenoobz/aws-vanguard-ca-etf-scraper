@@ -14,15 +14,15 @@ type Service struct {
 }
 
 // NewService create new service
-func NewService(r Repo, l logger.ContextLog) *Service {
+func NewService(repo Repo, log logger.ContextLog) *Service {
 	return &Service{
-		repo: r,
-		log:  l,
+		repo: repo,
+		log:  log,
 	}
 }
 
-// CreateHolding creates new holding
-func (s *Service) CreateHolding(ctx context.Context, e *entities.VanguardFundHolding) error {
-	s.log.Info(ctx, "create new holding")
-	return s.repo.InsertHolding(ctx, e)
+// CreateFundHolding creates new fund holding
+func (s *Service) CreateFundHolding(ctx context.Context, fundHolding *entities.VanguardFundHolding) error {
+	s.log.Info(ctx, "create new fund holding")
+	return s.repo.InsertFundHolding(ctx, fundHolding)
 }

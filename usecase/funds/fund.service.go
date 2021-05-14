@@ -1,4 +1,4 @@
-package fund
+package funds
 
 import (
 	"context"
@@ -14,15 +14,15 @@ type Service struct {
 }
 
 // NewService create new service
-func NewService(r Repo, l logger.ContextLog) *Service {
+func NewService(repo Repo, log logger.ContextLog) *Service {
 	return &Service{
-		repo: r,
-		log:  l,
+		repo: repo,
+		log:  log,
 	}
 }
 
 // CreateFund creates new fund
-func (s *Service) CreateFund(ctx context.Context, e *entities.VanguardFund) error {
+func (s *Service) CreateFund(ctx context.Context, fund *entities.VanguardFund) error {
 	s.log.Info(ctx, "creating new fund")
-	return s.repo.InsertFund(ctx, e)
+	return s.repo.InsertFund(ctx, fund)
 }

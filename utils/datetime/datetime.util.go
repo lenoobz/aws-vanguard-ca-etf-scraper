@@ -4,17 +4,17 @@ import (
 	"time"
 )
 
-// GetDateStartFromString gets start of date from string
-func GetDateStartFromString(d string) (*time.Time, error) {
-	if d == "" {
+// GetStarDateFromString gets start date from string
+func GetStarDateFromString(date string) (*time.Time, error) {
+	if date == "" {
 		return nil, nil
 	}
 
-	t, err := time.Parse(time.RFC3339, d)
+	startTime, err := time.Parse(time.RFC3339, date)
 	if err != nil {
 		return nil, err
 	}
 
-	t = time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.UTC)
-	return &t, nil
+	startTime = time.Date(startTime.Year(), startTime.Month(), startTime.Day(), 0, 0, 0, 0, time.UTC)
+	return &startTime, nil
 }
