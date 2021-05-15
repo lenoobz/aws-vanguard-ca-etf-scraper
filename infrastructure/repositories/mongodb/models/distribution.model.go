@@ -5,6 +5,7 @@ import (
 
 	logger "github.com/hthl85/aws-lambda-logger"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/entities"
+	"github.com/hthl85/aws-vanguard-ca-etf-scraper/utils/ticker"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -41,7 +42,7 @@ func NewFundDistributionModel(ctx context.Context, log logger.ContextLog, fundDi
 	}
 
 	if distributionDetails.Ticker != "" {
-		fundDistributionModels.Ticker = distributionDetails.Ticker
+		fundDistributionModels.Ticker = ticker.GenYahooTickerFromVanguardTicker(distributionDetails.Ticker)
 	}
 
 	// map distribution histories model

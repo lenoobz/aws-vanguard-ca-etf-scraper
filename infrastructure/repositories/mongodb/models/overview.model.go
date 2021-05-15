@@ -11,6 +11,7 @@ import (
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/consts"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/entities"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/utils/datetime"
+	"github.com/hthl85/aws-vanguard-ca-etf-scraper/utils/ticker"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -105,7 +106,7 @@ func NewFundOverviewModel(ctx context.Context, log logger.ContextLog, fundOvervi
 		}
 
 		if fundOverview.FundCode.ExchangeTicker != "" {
-			fundOverviewModel.Ticker = fundOverview.FundCode.ExchangeTicker
+			fundOverviewModel.Ticker = ticker.GenYahooTickerFromVanguardTicker(fundOverview.FundCode.ExchangeTicker)
 		}
 	}
 

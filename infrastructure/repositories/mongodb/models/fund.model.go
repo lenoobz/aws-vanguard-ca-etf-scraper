@@ -2,6 +2,7 @@ package models
 
 import (
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/entities"
+	"github.com/hthl85/aws-vanguard-ca-etf-scraper/utils/ticker"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -28,7 +29,7 @@ func NewFundModel(vanguardFund *entities.VanguardFund) (*VanguardFundModel, erro
 	var fundModel = &VanguardFundModel{}
 
 	if vanguardFund.Ticker != "" {
-		fundModel.Ticker = vanguardFund.Ticker
+		fundModel.Ticker = ticker.GenYahooTickerFromVanguardTicker(vanguardFund.Ticker)
 	}
 
 	if vanguardFund.Name != "" {
