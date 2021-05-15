@@ -7,6 +7,7 @@ type VanguardFundOverview struct {
 	Strategy         string              `json:"strategy,omitempty"`
 	TotalAssets      string              `json:"totalAssets,omitempty"`
 	DividendSchedule string              `json:"dividendSchedule,omitempty"`
+	Name             string              `json:"name,omitempty"`
 	ShortName        string              `json:"shortName,omitempty"`
 	Yield12Month     string              `json:"yield12Month,omitempty"`
 	Price            float64             `json:"price,omitempty"`

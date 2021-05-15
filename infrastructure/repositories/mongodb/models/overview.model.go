@@ -27,6 +27,7 @@ type VanguardOverviewModel struct {
 	Strategy         string                   `bson:"strategy,omitempty"`
 	DividendSchedule string                   `bson:"dividendSchedule,omitempty"`
 	Name             string                   `bson:"name,omitempty"`
+	ShortName        string                   `bson:"shortName,omitempty"`
 	Currency         string                   `bson:"currency,omitempty"`
 	Isin             string                   `bson:"isin,omitempty"`
 	Sedol            string                   `bson:"sedol,omitempty"`
@@ -77,7 +78,7 @@ func NewFundOverviewModel(ctx context.Context, log logger.ContextLog, fundOvervi
 	}
 
 	if fundOverview.AssetClass != "" {
-		fundOverviewModel.AssetClass = fundOverview.AssetClass
+		fundOverviewModel.AssetClass = strings.ToUpper(fundOverview.AssetClass)
 	}
 
 	if fundOverview.Strategy != "" {
@@ -89,7 +90,11 @@ func NewFundOverviewModel(ctx context.Context, log logger.ContextLog, fundOvervi
 	}
 
 	if fundOverview.ShortName != "" {
-		fundOverviewModel.Name = fundOverview.ShortName
+		fundOverviewModel.ShortName = fundOverview.ShortName
+	}
+
+	if fundOverview.Name != "" {
+		fundOverviewModel.Name = fundOverview.Name
 	}
 
 	if fundOverview.BaseCurrency != "" {

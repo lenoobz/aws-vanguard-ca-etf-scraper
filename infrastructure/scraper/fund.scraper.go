@@ -144,6 +144,7 @@ func (s *FundScraper) processFundListResponse(r *colly.Response) {
 			// scrape overview data
 			overviewURL := config.GetFundOverviewURL(key)
 			overviewCTX := colly.NewContext()
+			overviewCTX.Put("fundName", fund.Name)
 			s.ScrapeFundOverviewJob.Request("GET", overviewURL, nil, overviewCTX, nil)
 
 			// scrape holding data
@@ -173,7 +174,11 @@ func (s *FundScraper) processFundOverviewResponse(r *colly.Response) {
 	id, _ := uuid.NewRandom()
 	ctx := corid.NewContext(context.Background(), id)
 
-	overview := &entities.VanguardFundOverview{}
+	fundName := r.Request.Ctx.Get("fundName")
+
+	overview := &entities.VanguardFundOverview{
+		Name: fundName,
+	}
 	if err := json.Unmarshal(r.Body, overview); err != nil {
 		s.log.Error(ctx, "failed to parse fund overview response", "error", err)
 		return
