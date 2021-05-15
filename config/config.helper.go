@@ -16,6 +16,11 @@ func GetFundOverviewURL(portID string) string {
 	return fmt.Sprintf("https://api.vanguard.com/rs/gre/gra/1.7.0/datasets/caw-indv-overview-data-etf.json?vars=portId:%s,lang:en&path=[portId=%s][0]", portID, portID)
 }
 
+// GetFundDistributionURL get fund distribution url
+func GetFundDistributionURL(portID, issueType string) string {
+	return fmt.Sprintf("https://api.vanguard.com/rs/gre/gra/1.7.0/datasets/caw-indv-price-distribution.json?vars=portId:%s,issueType:%s", portID, issueType)
+}
+
 // GetFundHoldingURL get fund holding url
 func GetFundHoldingURL(portID, issueType, assetCode string) string {
 	var URL string

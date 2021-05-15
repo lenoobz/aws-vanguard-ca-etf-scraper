@@ -23,8 +23,8 @@ type VanguardFundModel struct {
 	MerFee        string              `bson:"merFee,omitempty"`
 }
 
-// NewVanguardFundModel create Vanguard fund model
-func NewVanguardFundModel(vanguardFund *entities.VanguardFund) (*VanguardFundModel, error) {
+// NewFundModel create Vanguard fund model
+func NewFundModel(vanguardFund *entities.VanguardFund) (*VanguardFundModel, error) {
 	var fundModel = &VanguardFundModel{}
 
 	if vanguardFund.Ticker != "" {

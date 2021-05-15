@@ -97,7 +97,7 @@ func (r *FundMongo) InsertFund(ctx context.Context, fund *entities.VanguardFund)
 	ctx, cancel := createContext(ctx, r.conf.TimeoutMS)
 	defer cancel()
 
-	fundModel, err := models.NewVanguardFundModel(fund)
+	fundModel, err := models.NewFundModel(fund)
 	if err != nil {
 		r.log.Error(ctx, "create model failed", "error", err)
 		return err
@@ -230,6 +230,59 @@ func (r *FundMongo) InsertFundHolding(ctx context.Context, fundHolding *entities
 		{
 			Key:   "$set",
 			Value: fundHoldingModel,
+		},
+		{
+			Key: "$setOnInsert",
+			Value: bson.D{{
+				Key:   "createdAt",
+				Value: time.Now().UTC().Unix(),
+			}},
+		},
+	}
+
+	opts := options.Update().SetUpsert(true)
+
+	_, err = col.UpdateOne(ctx, filter, update, opts)
+	if err != nil {
+		r.log.Error(ctx, "update one failed", "error", err)
+		return err
+	}
+
+	return nil
+}
+
+// InsertFundDistribution inserts fund distribution
+func (r *FundMongo) InsertFundDistribution(ctx context.Context, fundDistribution *entities.VanguardFundDistribution) error {
+	// create new context for the query
+	ctx, cancel := createContext(ctx, r.conf.TimeoutMS)
+	defer cancel()
+
+	fundDistributionModel, err := models.NewFundDistributionModel(ctx, r.log, fundDistribution)
+	if err != nil {
+		r.log.Error(ctx, "create model failed", "error", err)
+		return err
+	}
+
+	// what collection we are going to use
+	colname, ok := r.conf.Colnames[consts.VANGUARD_DISTRIBUTION_COL]
+	if !ok {
+		r.log.Error(ctx, "cannot find collection name")
+	}
+	col := r.db.Collection(colname)
+
+	fundDistributionModel.IsActive = true
+	fundDistributionModel.Schema = r.conf.SchemaVersion
+	fundDistributionModel.ModifiedAt = time.Now().UTC().Unix()
+
+	filter := bson.D{{
+		Key:   "portId",
+		Value: fundDistributionModel.PortID,
+	}}
+
+	update := bson.D{
+		{
+			Key:   "$set",
+			Value: fundDistributionModel,
 		},
 		{
 			Key: "$setOnInsert",

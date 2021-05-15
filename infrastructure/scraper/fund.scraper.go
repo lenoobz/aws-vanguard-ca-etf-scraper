@@ -14,6 +14,7 @@ import (
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/config"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/consts"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/entities"
+	"github.com/hthl85/aws-vanguard-ca-etf-scraper/usecase/distributions"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/usecase/funds"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/usecase/holding"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/usecase/overview"
@@ -21,29 +22,34 @@ import (
 
 // FundScraper struct
 type FundScraper struct {
-	ScrapeFundListJob     *colly.Collector
-	ScrapeFundHoldingJob  *colly.Collector
-	ScrapeFundOverviewJob *colly.Collector
-	fundService           *funds.Service
-	holdingService        *holding.Service
-	overviewService       *overview.Service
-	log                   logger.ContextLog
+	ScrapeFundListJob         *colly.Collector
+	ScrapeFundHoldingJob      *colly.Collector
+	ScrapeFundOverviewJob     *colly.Collector
+	ScrapeFundDistributionJob *colly.Collector
+	fundService               *funds.Service
+	holdingService            *holding.Service
+	overviewService           *overview.Service
+	distributionService       *distributions.Service
+	log                       logger.ContextLog
 }
 
 // NewFundScraper create new fund scraper
-func NewFundScraper(fundService *funds.Service, holdingService *holding.Service, overviewService *overview.Service, log logger.ContextLog) *FundScraper {
+func NewFundScraper(fundService *funds.Service, holdingService *holding.Service, overviewService *overview.Service, distributionService *distributions.Service, log logger.ContextLog) *FundScraper {
 	scrapeFundListJob := newScraperJob()
 	scrapeFundHoldingJob := newScraperJob()
 	scrapeFundOverviewJob := newScraperJob()
+	scrapeFundDistributionJob := newScraperJob()
 
 	return &FundScraper{
-		ScrapeFundListJob:     scrapeFundListJob,
-		ScrapeFundHoldingJob:  scrapeFundHoldingJob,
-		ScrapeFundOverviewJob: scrapeFundOverviewJob,
-		fundService:           fundService,
-		holdingService:        holdingService,
-		overviewService:       overviewService,
-		log:                   log,
+		ScrapeFundListJob:         scrapeFundListJob,
+		ScrapeFundHoldingJob:      scrapeFundHoldingJob,
+		ScrapeFundOverviewJob:     scrapeFundOverviewJob,
+		ScrapeFundDistributionJob: scrapeFundDistributionJob,
+		fundService:               fundService,
+		holdingService:            holdingService,
+		overviewService:           overviewService,
+		distributionService:       distributionService,
+		log:                       log,
 	}
 }
 
@@ -81,6 +87,9 @@ func (s *FundScraper) configJobs() {
 
 	s.ScrapeFundOverviewJob.OnError(s.errorHandler)
 	s.ScrapeFundOverviewJob.OnResponse(s.processFundOverviewResponse)
+
+	s.ScrapeFundDistributionJob.OnError(s.errorHandler)
+	s.ScrapeFundDistributionJob.OnResponse(s.processFundDistributionResponse)
 }
 
 // ScrapeAllVanguardFundsDetails scrape all Vanguard funds details
@@ -96,17 +105,18 @@ func (s *FundScraper) ScrapeAllVanguardFundsDetails() {
 	s.ScrapeFundListJob.Wait()
 	s.ScrapeFundHoldingJob.Wait()
 	s.ScrapeFundOverviewJob.Wait()
+	s.ScrapeFundDistributionJob.Wait()
 }
-
-///////////////////////////////////////////////////////////
-// Fund List Scraper
-///////////////////////////////////////////////////////////
 
 // errorHandler generic error handler for all scaper jobs
 func (s *FundScraper) errorHandler(r *colly.Response, err error) {
 	ctx := context.Background()
 	s.log.Error(ctx, "failed to request url", "url", r.Request.URL, "error", err)
 }
+
+///////////////////////////////////////////////////////////
+// Fund List Scraper
+///////////////////////////////////////////////////////////
 
 func (s *FundScraper) processFundListResponse(r *colly.Response) {
 	// create correlation if for processing fund list
@@ -143,6 +153,13 @@ func (s *FundScraper) processFundListResponse(r *colly.Response) {
 			holdingCTX.Put("ticker", fund.Ticker)
 			holdingCTX.Put("assetCode", fund.AssetCode)
 			s.ScrapeFundHoldingJob.Request("GET", holdingURL, nil, holdingCTX, nil)
+
+			// scrape distribution data
+			distributionURL := config.GetFundDistributionURL(key, "F")
+			distributionCTX := colly.NewContext()
+			distributionCTX.Put("portId", key)
+			distributionCTX.Put("ticker", fund.Ticker)
+			s.ScrapeFundDistributionJob.Request("GET", distributionURL, nil, distributionCTX, nil)
 		}
 	}
 }
@@ -204,6 +221,30 @@ func (s *FundScraper) processFundHoldingResponse(r *colly.Response) {
 	}
 
 	if err := s.holdingService.CreateFundHolding(ctx, holding); err != nil {
-		s.log.Error(ctx, "failed to create holding", "portId", portID, "error", err)
+		s.log.Error(ctx, "failed to create holding", "portId", portID, "ticker", ticker, "error", err)
+	}
+}
+
+///////////////////////////////////////////////////////////
+// Fund Distribution Scraper
+///////////////////////////////////////////////////////////
+
+func (s *FundScraper) processFundDistributionResponse(r *colly.Response) {
+	// create correlation if for processing fund holding
+	id, _ := uuid.NewRandom()
+	ctx := corid.NewContext(context.Background(), id)
+
+	portID := r.Request.Ctx.Get("portId")
+	ticker := r.Request.Ctx.Get("ticker")
+
+	fundDistribution := &entities.VanguardFundDistribution{}
+
+	if err := json.Unmarshal(r.Body, &fundDistribution); err != nil {
+		s.log.Error(ctx, "failed to parse fund distribution response", "error", err)
+	}
+
+	fundDistribution.DistributionDetails.Ticker = ticker
+	if err := s.distributionService.CreateFundDistribution(ctx, fundDistribution); err != nil {
+		s.log.Error(ctx, "failed to create fund distribution", "portId", portID, "ticker", ticker, "error", err)
 	}
 }
