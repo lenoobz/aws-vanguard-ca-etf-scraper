@@ -38,6 +38,7 @@ type VanguardOverviewModel struct {
 	ManagementFee    float64                  `bson:"managementFee,omitempty"`
 	MerFee           float64                  `bson:"merFee,omitempty"`
 	DistYield        float64                  `bson:"distYield,omitempty"`
+	DistAmount       float64                  `bson:"distAmount,omitempty"`
 	AllocationStock  float64                  `bson:"allocationStock,omitempty"`
 	AllocationBond   float64                  `bson:"allocationBond,omitempty"`
 	AllocationCash   float64                  `bson:"allocationCash,omitempty"`
@@ -170,6 +171,17 @@ func NewFundOverviewModel(ctx context.Context, log logger.ContextLog, fundOvervi
 		}
 
 		fundOverviewModel.DistYield = distYield
+	}
+
+	if fundOverview.DistAmount != "" {
+		distAmount, err := strconv.ParseFloat(fundOverview.DistAmount, 64)
+
+		if err != nil {
+			log.Warn(ctx, "parse Overview.DistAmount failed", "error", err, "DistAmount", fundOverview.DistAmount)
+			distAmount = 0
+		}
+
+		fundOverviewModel.DistAmount = distAmount
 	}
 
 	fundOverviewModel.AllocationStock = fundOverview.AllocationStock
