@@ -23,7 +23,7 @@ type VanguardFundDistributionModel struct {
 
 // FundDistribution struct
 type DistributionHistoryModel struct {
-	Type               string  `bson:"portId,omitempty"`
+	Type               string  `bson:"type,omitempty"`
 	DistributionAmount float64 `bson:"distributionAmount,omitempty"`
 	ExDividendDate     string  `bson:"exDividendDate,omitempty"`
 	RecordDate         string  `bson:"recordDate,omitempty"`

@@ -11,7 +11,7 @@ type VanguardFundDistribution struct {
 
 // DistributionHistory struct
 type DistributionHistory struct {
-	Type               string  `json:"portId,omitempty"`
+	Type               string  `json:"type,omitempty"`
 	DistributionAmount float64 `json:"distributionAmount,omitempty"`
 	ExDividendDate     string  `json:"exDividendDate,omitempty"`
 	RecordDate         string  `json:"recordDate,omitempty"`
