@@ -87,7 +87,7 @@ func NewFundOverviewModel(ctx context.Context, log logger.ContextLog, fundOvervi
 	}
 
 	if fundOverview.DividendSchedule != "" {
-		fundOverviewModel.DividendSchedule = fundOverview.DividendSchedule
+		fundOverviewModel.DividendSchedule = strings.ToUpper(fundOverview.DividendSchedule)
 	}
 
 	if fundOverview.ShortName != "" {
