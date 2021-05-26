@@ -34,8 +34,9 @@ type FundCode struct {
 
 // SectorBreakdown struct
 type SectorBreakdown struct {
-	FundPercent string `json:"fundPercent,omitempty"`
-	SectorName  string `json:"longName,omitempty"`
+	BenchmarkPercent string `json:"benchmarkPercent,omitempty"`
+	FundPercent      string `json:"fundPercent,omitempty"`
+	SectorName       string `json:"longName,omitempty"`
 }
 
 // CountryBreakdown struct

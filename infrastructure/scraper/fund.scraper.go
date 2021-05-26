@@ -108,6 +108,19 @@ func (s *FundScraper) ScrapeAllVanguardFundsDetails() {
 	s.ScrapeFundDistributionJob.Wait()
 }
 
+// ScrapeAllVanguardFundsDetails scrape all Vanguard funds details
+func (s *FundScraper) ScrapeSingleFundsOverview(portID string, fundName string) {
+	s.configJobs()
+
+	// scrape overview data
+	overviewURL := config.GetFundOverviewURL(portID)
+	overviewCTX := colly.NewContext()
+	overviewCTX.Put("fundName", fundName)
+	s.ScrapeFundOverviewJob.Request("GET", overviewURL, nil, overviewCTX, nil)
+
+	s.ScrapeFundOverviewJob.Wait()
+}
+
 // errorHandler generic error handler for all scaper jobs
 func (s *FundScraper) errorHandler(r *colly.Response, err error) {
 	ctx := context.Background()

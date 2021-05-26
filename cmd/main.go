@@ -39,4 +39,5 @@ func main() {
 	// create new scraper jobs
 	jobs := scraper.NewFundScraper(fundService, fundHoldingService, fundOverviewService, fundDistributionService, zap)
 	jobs.ScrapeAllVanguardFundsDetails()
+	// jobs.ScrapeSingleFundsOverview("9559", "Debugging")
 }

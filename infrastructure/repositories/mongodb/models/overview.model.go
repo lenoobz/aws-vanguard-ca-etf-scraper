@@ -197,7 +197,9 @@ func NewFundOverviewModel(ctx context.Context, log logger.ContextLog, fundOvervi
 			return nil, err
 		}
 
-		sectorModels = append(sectorModels, sectorModel)
+		if sectorModel != nil {
+			sectorModels = append(sectorModels, sectorModel)
+		}
 	}
 	fundOverviewModel.Sectors = sectorModels
 
@@ -260,7 +262,24 @@ func newSectorBreakdownModel(ctx context.Context, log logger.ContextLog, sectorB
 		sectorBreakdownModel.FundPercent = fundPercent
 	}
 
-	return sectorBreakdownModel, nil
+	// We will try to use BenchmarkPercent if FundPercent is not available
+	if sectorBreakdownModel.FundPercent == 0 && sectorBreakdown.BenchmarkPercent != "" {
+		benchmarkPercent, err := strconv.ParseFloat(sectorBreakdown.BenchmarkPercent, 64)
+
+		if err != nil {
+			log.Warn(ctx, "parse SectorWeighting.BenchmarkPercent failed", "error", err, "BenchmarkPercent", sectorBreakdown.BenchmarkPercent)
+			benchmarkPercent = 0
+		}
+
+		sectorBreakdownModel.FundPercent = benchmarkPercent
+	}
+
+	// We are only interested in sector that has FundPercent/BenchmarkPercent
+	if sectorBreakdownModel.FundPercent != 0 {
+		return sectorBreakdownModel, nil
+	}
+
+	return nil, nil
 }
 
 // newCountryBreakdownModel create country breakdown model
