@@ -18,7 +18,7 @@ var AppConf = AppConfig{
 		Host:          host,
 		Username:      username,
 		Password:      password,
-		Dbname:        "povi_dev",
+		Dbname:        "povi",
 		SchemaVersion: "1",
 		Colnames: map[string]string{
 			"vanguard_fund_list":         "vanguard_fund_list",
