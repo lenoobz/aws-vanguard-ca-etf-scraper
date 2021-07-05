@@ -22,7 +22,7 @@ func NewService(repo Repo, log logger.ContextLog) *Service {
 }
 
 // CreateFund creates new fund
-func (s *Service) CreateFund(ctx context.Context, fund *entities.VanguardFund) error {
+func (s *Service) CreateFund(ctx context.Context, fund *entities.Fund) error {
 	s.log.Info(ctx, "creating new fund")
 	return s.repo.InsertFund(ctx, fund)
 }

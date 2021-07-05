@@ -2,8 +2,8 @@ package entities
 
 import "encoding/json"
 
-// VanguardFundHolding represents Vanguard fund holding entity
-type VanguardFundHolding struct {
+// FundHolding struct
+type FundHolding struct {
 	PortID    string             `json:"portId,omitempty"`
 	Ticker    string             `json:"ticker,omitempty"`
 	AssetCode string             `json:"assetCode,omitempty"`
@@ -12,17 +12,17 @@ type VanguardFundHolding struct {
 	Balances  []*BalancedHolding `json:"balancedHolding,omitempty"`
 }
 
-// BondHolding represents fund bond holding details
+// BondHolding struct
 type BondHolding struct {
 	SectorWeightBonds []*SectorWeightBond `json:"sectorWeightBond,omitempty"`
 }
 
-// EquityHolding represents fund equity holding details
+// EquityHolding struct
 type EquityHolding struct {
 	SectorWeightStocks []*SectorWeightStock `json:"sectorWeightStock,omitempty"`
 }
 
-// BalancedHolding represents fund balance holding details
+// BalancedHolding struct
 type BalancedHolding struct {
 	SectorWeightBonds  []*SectorWeightBond  `json:"sectorWeightBond,omitempty"`
 	SectorWeightStocks []*SectorWeightStock `json:"sectorWeightStock,omitempty"`

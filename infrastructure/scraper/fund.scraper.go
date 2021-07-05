@@ -138,7 +138,7 @@ func (s *FundScraper) processFundListResponse(r *colly.Response) {
 
 	// define anonymous struct to map fund data from fund list reponse
 	d := struct {
-		Funds map[string]entities.VanguardFund `json:"fundData,omitempty"`
+		Funds map[string]entities.Fund `json:"fundData,omitempty"`
 	}{}
 
 	// unmarshal response data to above struct
@@ -189,7 +189,7 @@ func (s *FundScraper) processFundOverviewResponse(r *colly.Response) {
 
 	fundName := r.Request.Ctx.Get("fundName")
 
-	overview := &entities.VanguardFundOverview{
+	overview := &entities.FundOverview{
 		Name: fundName,
 	}
 	if err := json.Unmarshal(r.Body, overview); err != nil {
@@ -215,7 +215,7 @@ func (s *FundScraper) processFundHoldingResponse(r *colly.Response) {
 	ticker := r.Request.Ctx.Get("ticker")
 	assetCode := r.Request.Ctx.Get("assetCode")
 
-	holding := &entities.VanguardFundHolding{
+	holding := &entities.FundHolding{
 		PortID:    portID,
 		Ticker:    ticker,
 		AssetCode: assetCode,
@@ -255,7 +255,7 @@ func (s *FundScraper) processFundDistributionResponse(r *colly.Response) {
 	portID := r.Request.Ctx.Get("portId")
 	ticker := r.Request.Ctx.Get("ticker")
 
-	fundDistribution := &entities.VanguardFundDistribution{}
+	fundDistribution := &entities.FundDistribution{}
 
 	if err := json.Unmarshal(r.Body, &fundDistribution); err != nil {
 		s.log.Error(ctx, "failed to parse fund distribution response", "error", err)

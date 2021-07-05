@@ -1,7 +1,7 @@
 package entities
 
-// VanguardFund represents a Vanguard fund entity
-type VanguardFund struct {
+// Fund struct
+type Fund struct {
 	Ticker        string `json:"TICKER,omitempty"`
 	AssetCode     string `json:"assetCode,omitempty"`
 	Name          string `json:"parentLongName,omitempty"`

@@ -22,7 +22,7 @@ func NewService(repo Repo, log logger.ContextLog) *Service {
 }
 
 // CreateFundOverview creates new overview
-func (s *Service) CreateFundOverview(ctx context.Context, fundOverview *entities.VanguardFundOverview) error {
+func (s *Service) CreateFundOverview(ctx context.Context, fundOverview *entities.FundOverview) error {
 	s.log.Info(ctx, "create new fund overview")
 	return s.repo.InsertFundOverview(ctx, fundOverview)
 }

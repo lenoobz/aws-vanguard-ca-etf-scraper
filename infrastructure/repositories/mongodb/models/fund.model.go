@@ -1,17 +1,22 @@
 package models
 
 import (
+	"context"
+	"time"
+
+	logger "github.com/hthl85/aws-lambda-logger"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/entities"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/utils/ticker"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// VanguardFundModel represents a Vanguard fund model
-type VanguardFundModel struct {
+// FundModel struct
+type FundModel struct {
 	ID            *primitive.ObjectID `bson:"_id,omitempty"`
-	IsActive      bool                `bson:"isActive,omitempty"`
 	CreatedAt     int64               `bson:"createdAt,omitempty"`
 	ModifiedAt    int64               `bson:"modifiedAt,omitempty"`
+	Enabled       bool                `bson:"enabled"`
+	Deleted       bool                `bson:"deleted"`
 	Schema        string              `bson:"schema,omitempty"`
 	Ticker        string              `bson:"ticker,omitempty"`
 	AssetCode     string              `bson:"assetCode,omitempty"`
@@ -25,8 +30,13 @@ type VanguardFundModel struct {
 }
 
 // NewFundModel create Vanguard fund model
-func NewFundModel(vanguardFund *entities.VanguardFund) (*VanguardFundModel, error) {
-	var fundModel = &VanguardFundModel{}
+func NewFundModel(ctx context.Context, log logger.ContextLog, vanguardFund *entities.Fund, schemaVersion string) (*FundModel, error) {
+	var fundModel = &FundModel{
+		ModifiedAt: time.Now().UTC().Unix(),
+		Enabled:    true,
+		Deleted:    false,
+		Schema:     schemaVersion,
+	}
 
 	if vanguardFund.Ticker != "" {
 		fundModel.Ticker = ticker.GenYahooTickerFromVanguardTicker(vanguardFund.Ticker)

@@ -15,7 +15,7 @@ type Reader interface{}
 
 // Writer interface
 type Writer interface {
-	InsertFundDistribution(ctx context.Context, fundDistribution *entities.VanguardFundDistribution) error
+	InsertFundDistribution(ctx context.Context, fundDistribution *entities.FundDistribution) error
 }
 
 // Repo interface

@@ -22,7 +22,7 @@ func NewService(repo Repo, log logger.ContextLog) *Service {
 }
 
 // CreateFundDistribution creates new fund distribution
-func (s *Service) CreateFundDistribution(ctx context.Context, fundDistribution *entities.VanguardFundDistribution) error {
+func (s *Service) CreateFundDistribution(ctx context.Context, fundDistribution *entities.FundDistribution) error {
 	s.log.Info(ctx, "create new fund distribution")
 	return s.repo.InsertFundDistribution(ctx, fundDistribution)
 }

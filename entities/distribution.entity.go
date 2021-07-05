@@ -1,7 +1,7 @@
 package entities
 
-// VanguardFundDistribution struct
-type VanguardFundDistribution struct {
+// FundDistribution struct
+type FundDistribution struct {
 	DistributionDetails struct {
 		PortID                string                 `json:"portId,omitempty"`
 		Ticker                string                 `json:"ticker,omitempty"`

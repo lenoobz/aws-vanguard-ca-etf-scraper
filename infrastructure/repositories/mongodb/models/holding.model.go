@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"strings"
+	"time"
 
 	logger "github.com/hthl85/aws-lambda-logger"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/consts"
@@ -11,12 +12,13 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// VanguardFundHoldingModel represents Vanguard fund holding model
-type VanguardFundHoldingModel struct {
+// FundHoldingModel struct
+type FundHoldingModel struct {
 	ID         *primitive.ObjectID       `bson:"_id,omitempty"`
-	IsActive   bool                      `bson:"isActive,omitempty"`
 	CreatedAt  int64                     `bson:"createdAt,omitempty"`
 	ModifiedAt int64                     `bson:"modifiedAt,omitempty"`
+	Enabled    bool                      `bson:"enabled"`
+	Deleted    bool                      `bson:"deleted"`
 	Schema     string                    `bson:"schema,omitempty"`
 	PortID     string                    `bson:"portId,omitempty"`
 	Ticker     string                    `bson:"ticker,omitempty"`
@@ -44,24 +46,29 @@ type SectorWeightStockModel struct {
 }
 
 // NewFundHoldingModel create a fund holding model
-func NewFundHoldingModel(ctx context.Context, log logger.ContextLog, fundHolding *entities.VanguardFundHolding) (*VanguardFundHoldingModel, error) {
+func NewFundHoldingModel(ctx context.Context, log logger.ContextLog, fundHolding *entities.FundHolding, schemaVersion string) (*FundHoldingModel, error) {
 	if strings.EqualFold(fundHolding.AssetCode, consts.BOND) {
-		return newBondHolding(ctx, log, fundHolding)
+		return newBondHolding(ctx, log, fundHolding, schemaVersion)
 	}
 
 	if strings.EqualFold(fundHolding.AssetCode, consts.EQUITY) {
-		return newEquityHolding(ctx, log, fundHolding)
+		return newEquityHolding(ctx, log, fundHolding, schemaVersion)
 	}
 
 	if strings.EqualFold(fundHolding.AssetCode, consts.BALANCED) {
-		return newBalanceHolding(ctx, log, fundHolding)
+		return newBalanceHolding(ctx, log, fundHolding, schemaVersion)
 	}
 
 	return nil, nil
 }
 
-func newBondHolding(ctx context.Context, log logger.ContextLog, fundHolding *entities.VanguardFundHolding) (*VanguardFundHoldingModel, error) {
-	var fundHoldingModel = &VanguardFundHoldingModel{}
+func newBondHolding(ctx context.Context, log logger.ContextLog, fundHolding *entities.FundHolding, schemaVersion string) (*FundHoldingModel, error) {
+	var fundHoldingModel = &FundHoldingModel{
+		ModifiedAt: time.Now().UTC().Unix(),
+		Enabled:    true,
+		Deleted:    false,
+		Schema:     schemaVersion,
+	}
 
 	if fundHolding.PortID != "" {
 		fundHoldingModel.PortID = fundHolding.PortID
@@ -92,8 +99,13 @@ func newBondHolding(ctx context.Context, log logger.ContextLog, fundHolding *ent
 	return fundHoldingModel, nil
 }
 
-func newEquityHolding(ctx context.Context, log logger.ContextLog, fundHolding *entities.VanguardFundHolding) (*VanguardFundHoldingModel, error) {
-	var fundHoldingModel = &VanguardFundHoldingModel{}
+func newEquityHolding(ctx context.Context, log logger.ContextLog, fundHolding *entities.FundHolding, schemaVersion string) (*FundHoldingModel, error) {
+	var fundHoldingModel = &FundHoldingModel{
+		ModifiedAt: time.Now().UTC().Unix(),
+		Enabled:    true,
+		Deleted:    false,
+		Schema:     schemaVersion,
+	}
 
 	if fundHolding.PortID != "" {
 		fundHoldingModel.PortID = fundHolding.PortID
@@ -124,8 +136,13 @@ func newEquityHolding(ctx context.Context, log logger.ContextLog, fundHolding *e
 	return fundHoldingModel, nil
 }
 
-func newBalanceHolding(ctx context.Context, log logger.ContextLog, fundHolding *entities.VanguardFundHolding) (*VanguardFundHoldingModel, error) {
-	var fundHoldingModel = &VanguardFundHoldingModel{}
+func newBalanceHolding(ctx context.Context, log logger.ContextLog, fundHolding *entities.FundHolding, schemaVersion string) (*FundHoldingModel, error) {
+	var fundHoldingModel = &FundHoldingModel{
+		ModifiedAt: time.Now().UTC().Unix(),
+		Enabled:    true,
+		Deleted:    false,
+		Schema:     schemaVersion,
+	}
 
 	if fundHolding.PortID != "" {
 		fundHoldingModel.PortID = fundHolding.PortID

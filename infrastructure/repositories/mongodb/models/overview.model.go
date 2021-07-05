@@ -15,12 +15,13 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// VanguardOverviewModel struct
-type VanguardOverviewModel struct {
+// FundOverviewModel struct
+type FundOverviewModel struct {
 	ID               *primitive.ObjectID      `bson:"_id,omitempty"`
-	IsActive         bool                     `bson:"isActive,omitempty"`
 	CreatedAt        int64                    `bson:"createdAt,omitempty"`
 	ModifiedAt       int64                    `bson:"modifiedAt,omitempty"`
+	Enabled          bool                     `bson:"enabled"`
+	Deleted          bool                     `bson:"deleted"`
 	Schema           string                   `bson:"schema,omitempty"`
 	PortID           string                   `bson:"portId,omitempty"`
 	AssetClass       string                   `bson:"assetClass,omitempty"`
@@ -70,9 +71,14 @@ type DividendHistoryModel struct {
 	AsOfDate     *time.Time `bson:"asOfDate,omitempty"`
 }
 
-// NewFundOverviewModel create a fund overview model
-func NewFundOverviewModel(ctx context.Context, log logger.ContextLog, fundOverview *entities.VanguardFundOverview) (*VanguardOverviewModel, error) {
-	var fundOverviewModel = &VanguardOverviewModel{}
+// NewOverviewModel create a fund overview model
+func NewOverviewModel(ctx context.Context, log logger.ContextLog, fundOverview *entities.FundOverview, schemaVersion string) (*FundOverviewModel, error) {
+	var fundOverviewModel = &FundOverviewModel{
+		ModifiedAt: time.Now().UTC().Unix(),
+		Enabled:    true,
+		Deleted:    false,
+		Schema:     schemaVersion,
+	}
 
 	if fundOverview.PortID != "" {
 		fundOverviewModel.PortID = fundOverview.PortID

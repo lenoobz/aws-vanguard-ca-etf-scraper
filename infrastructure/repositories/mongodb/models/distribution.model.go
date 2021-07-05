@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"time"
 
 	logger "github.com/hthl85/aws-lambda-logger"
 	"github.com/hthl85/aws-vanguard-ca-etf-scraper/entities"
@@ -9,12 +10,13 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// VanguardFundDistributionModel struct
-type VanguardFundDistributionModel struct {
+// FundDistributionModel struct
+type FundDistributionModel struct {
 	ID                    *primitive.ObjectID         `bson:"_id,omitempty"`
-	IsActive              bool                        `bson:"isActive,omitempty"`
 	CreatedAt             int64                       `bson:"createdAt,omitempty"`
 	ModifiedAt            int64                       `bson:"modifiedAt,omitempty"`
+	Enabled               bool                        `bson:"enabled"`
+	Deleted               bool                        `bson:"deleted"`
 	Schema                string                      `bson:"schema,omitempty"`
 	PortID                string                      `bson:"portId,omitempty"`
 	Ticker                string                      `bson:"ticker,omitempty"`
@@ -33,9 +35,14 @@ type DistributionHistoryModel struct {
 }
 
 // NewFundDistributionModel create a fund distribution model
-func NewFundDistributionModel(ctx context.Context, log logger.ContextLog, fundDistribution *entities.VanguardFundDistribution) (*VanguardFundDistributionModel, error) {
+func NewFundDistributionModel(ctx context.Context, log logger.ContextLog, fundDistribution *entities.FundDistribution, schemaVersion string) (*FundDistributionModel, error) {
 	distributionDetails := fundDistribution.DistributionDetails
-	var fundDistributionModels = &VanguardFundDistributionModel{}
+	var fundDistributionModels = &FundDistributionModel{
+		ModifiedAt: time.Now().UTC().Unix(),
+		Enabled:    true,
+		Deleted:    false,
+		Schema:     schemaVersion,
+	}
 
 	if distributionDetails.PortID != "" {
 		fundDistributionModels.PortID = distributionDetails.PortID

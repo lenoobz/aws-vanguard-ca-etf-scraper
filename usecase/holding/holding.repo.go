@@ -15,7 +15,7 @@ type Reader interface{}
 
 // Writer interface
 type Writer interface {
-	InsertFundHolding(ctx context.Context, fundHolding *entities.VanguardFundHolding) error
+	InsertFundHolding(ctx context.Context, fundHolding *entities.FundHolding) error
 }
 
 // Repo interface
