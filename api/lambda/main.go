@@ -4,14 +4,14 @@ import (
 	"log"
 
 	"github.com/aws/aws-lambda-go/lambda"
-	logger "github.com/hthl85/aws-lambda-logger"
-	"github.com/hthl85/aws-vanguard-ca-etf-scraper/config"
-	"github.com/hthl85/aws-vanguard-ca-etf-scraper/infrastructure/repositories/mongodb/repos"
-	"github.com/hthl85/aws-vanguard-ca-etf-scraper/infrastructure/scraper"
-	"github.com/hthl85/aws-vanguard-ca-etf-scraper/usecase/distributions"
-	"github.com/hthl85/aws-vanguard-ca-etf-scraper/usecase/funds"
-	"github.com/hthl85/aws-vanguard-ca-etf-scraper/usecase/holding"
-	"github.com/hthl85/aws-vanguard-ca-etf-scraper/usecase/overview"
+	logger "github.com/lenoobz/aws-lambda-logger"
+	"github.com/lenoobz/aws-vanguard-ca-etf-scraper/config"
+	"github.com/lenoobz/aws-vanguard-ca-etf-scraper/infrastructure/repositories/mongodb/repos"
+	"github.com/lenoobz/aws-vanguard-ca-etf-scraper/infrastructure/scraper"
+	"github.com/lenoobz/aws-vanguard-ca-etf-scraper/usecase/distributions"
+	"github.com/lenoobz/aws-vanguard-ca-etf-scraper/usecase/funds"
+	"github.com/lenoobz/aws-vanguard-ca-etf-scraper/usecase/holding"
+	"github.com/lenoobz/aws-vanguard-ca-etf-scraper/usecase/overview"
 )
 
 func main() {

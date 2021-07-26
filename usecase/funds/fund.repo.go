@@ -3,7 +3,7 @@ package funds
 import (
 	"context"
 
-	"github.com/hthl85/aws-vanguard-ca-etf-scraper/entities"
+	"github.com/lenoobz/aws-vanguard-ca-etf-scraper/entities"
 )
 
 ///////////////////////////////////////////////////////////

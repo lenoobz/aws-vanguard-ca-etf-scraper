@@ -3,8 +3,8 @@ package funds
 import (
 	"context"
 
-	logger "github.com/hthl85/aws-lambda-logger"
-	"github.com/hthl85/aws-vanguard-ca-etf-scraper/entities"
+	logger "github.com/lenoobz/aws-lambda-logger"
+	"github.com/lenoobz/aws-vanguard-ca-etf-scraper/entities"
 )
 
 // Service sector

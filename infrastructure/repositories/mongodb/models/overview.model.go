@@ -7,11 +7,11 @@ import (
 	"strings"
 	"time"
 
-	logger "github.com/hthl85/aws-lambda-logger"
-	"github.com/hthl85/aws-vanguard-ca-etf-scraper/consts"
-	"github.com/hthl85/aws-vanguard-ca-etf-scraper/entities"
-	"github.com/hthl85/aws-vanguard-ca-etf-scraper/utils/datetime"
-	"github.com/hthl85/aws-vanguard-ca-etf-scraper/utils/ticker"
+	logger "github.com/lenoobz/aws-lambda-logger"
+	"github.com/lenoobz/aws-vanguard-ca-etf-scraper/consts"
+	"github.com/lenoobz/aws-vanguard-ca-etf-scraper/entities"
+	"github.com/lenoobz/aws-vanguard-ca-etf-scraper/utils/datetime"
+	"github.com/lenoobz/aws-vanguard-ca-etf-scraper/utils/ticker"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
